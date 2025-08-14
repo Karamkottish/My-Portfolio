@@ -2,12 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:flutter/foundation.dart'; // For kIsWeb
+import 'package:flutter/foundation.dart';
 import '../data/profile_data.dart';
 import '../widgets/animated_tagline.dart';
 import '../widgets/experience_section.dart';
 import '../widgets/skills_section.dart';
 import 'cv_viewer_page.dart';
+import 'package:video_player/video_player.dart';
 
 class PortfolioHomePage extends StatelessWidget {
   const PortfolioHomePage({super.key});
@@ -16,8 +17,6 @@ class PortfolioHomePage extends StatelessWidget {
     final Uri uri = Uri.parse(url);
     if (await canLaunchUrl(uri)) {
       await launchUrl(uri, mode: LaunchMode.externalApplication);
-    } else {
-      throw 'Could not launch $url';
     }
   }
 
@@ -27,15 +26,11 @@ class PortfolioHomePage extends StatelessWidget {
       final Uri url = Uri.parse(cvUrl);
       if (await canLaunchUrl(url)) {
         await launchUrl(url, webOnlyWindowName: '_blank');
-      } else {
-        throw 'Could not open CV';
       }
     } else {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (context) => const CVViewerPage(),
-        ),
+        MaterialPageRoute(builder: (context) => const CVViewerPage()),
       );
     }
   }
@@ -62,80 +57,164 @@ class PortfolioHomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildProjectCard(Project project, String imagePath, Color glowColor) {
-    return _HoverZoomCard(
-      glowColor: glowColor,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.05),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Colors.white24),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            if (imagePath.isNotEmpty)
-              ClipRRect(
-                borderRadius: BorderRadius.circular(20),
-                child: Image.asset(
-                  imagePath,
-                  height: 200,
-                  width: 200,
-                  fit: BoxFit.cover,
-                ),
+  // UPDATED: added mediaSize and moved GitLab icon under description
+  Widget _buildProjectCard(
+      BuildContext context,
+      Project project, {
+        String? imagePath,
+        String? videoPath,
+        String? projectLink,
+        String? gitlabLink,
+        double? mediaSize, // pass 200.0 to make square like profile image
+      }) {
+    return StatefulBuilder(
+      builder: (context, setState) {
+        bool isHovered = false;
+
+        return MouseRegion(
+          onEnter: (_) => setState(() => isHovered = true),
+          onExit: (_) => setState(() => isHovered = false),
+          cursor: SystemMouseCursors.click,
+          child: GestureDetector(
+            onTap: () async {
+              if (videoPath != null) {
+                await showDialog(
+                  context: context,
+                  builder: (_) => ProjectVideoDemo(videoPath: videoPath),
+                );
+                if (projectLink != null) {
+                  _launchURL(projectLink);
+                }
+              } else if (project.link != null) {
+                _launchURL(project.link!);
+              }
+            },
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              transform: Matrix4.identity()..scale(isHovered ? 1.05 : 1.0),
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Colors.white.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.white24),
+                boxShadow: isHovered
+                    ? [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 12,
+                    spreadRadius: 2,
+                    offset: const Offset(0, 6),
+                  )
+                ]
+                    : [],
               ),
-            if (imagePath.isNotEmpty) const SizedBox(height: 12),
-            InkWell(
-              onTap: () => _launchURL(project.link ?? ProfileData.github),
-              child: Text(
-                project.name,
-                style: const TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.lightBlueAccent,
-                  decoration: TextDecoration.underline,
-                ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // IMAGE/THUMBNAIL
+                  if (imagePath != null)
+                    if (mediaSize != null)
+                      Center(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(20),
+                          child: SizedBox(
+                            width: mediaSize,
+                            height: mediaSize,
+                            child: Image.asset(
+                              imagePath,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      )
+                    else
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: Image.asset(
+                          imagePath,
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                  else
+                    Container(
+                      height: mediaSize ?? 200,
+                      width: mediaSize ?? double.infinity,
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        color: Colors.white12,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Text(
+                        "No Image",
+                        style: TextStyle(color: Colors.white70, fontSize: 16),
+                      ),
+                    ),
+
+                  const SizedBox(height: 12),
+
+                  // TITLE
+                  Text(
+                    project.name,
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.lightBlueAccent,
+                      decoration: TextDecoration.underline,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+
+                  // META
+                  Text(
+                    "${project.role} • ${project.date}",
+                    style: const TextStyle(fontSize: 14, color: Colors.white70),
+                  ),
+                  const SizedBox(height: 8),
+
+                  // SUMMARY
+                  Text(
+                    project.summary,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 14, color: Colors.white),
+                  ),
+
+                  // GitLab ICON moved under description
+                  if (gitlabLink != null) ...[
+                    const SizedBox(height: 12),
+                    InkWell(
+                      onTap: () => _launchURL(gitlabLink),
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withOpacity(0.08),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.white24),
+                        ),
+                        child: SvgPicture.asset(
+                          'lib/assets/icons/icons8-gitlab-100.svg',
+                          height: 24,
+                          width: 24,
+                          colorFilter: const ColorFilter.mode(
+                            Colors.white,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              "${project.role} • ${project.date}",
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.white70,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              project.summary,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 14,
-                color: Colors.white,
-              ),
-            ),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildProjectsSection(BuildContext context) {
-    // Images for projects
-    final List<String> projectImages = [
-      "lib/assets/projects/RevonixYellow.jpg", // Revonix
-      "", // Shein Replica (no image)
-      "lib/assets/projects/Change.png", // Change Volunteer App
-    ];
-
-    // Glow colors for projects
-    final List<Color> glowColors = [
-      Colors.amberAccent, // Revonix
-      Colors.tealAccent, // Shein Replica
-      Colors.lightBlueAccent, // Change Volunteer App
-    ];
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -148,32 +227,48 @@ class PortfolioHomePage extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        ...ProfileData.projects.asMap().entries.map((entry) {
-          final index = entry.key;
-          final project = entry.value;
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 20),
-            child: Center(
-              child: index.isEven
-                  ? SlideInLeft(
-                duration: Duration(milliseconds: 500 + (index * 200)),
-                child: _buildProjectCard(
-                  project,
-                  projectImages[index],
-                  glowColors[index],
+
+        // Revonix card: square image 200x200 and GitLab under description
+        _buildProjectCard(
+          context,
+          ProfileData.projects[0],
+          videoPath: 'lib/assets/videos/fullvideoGrad.MP4',
+          imagePath: 'lib/assets/projects/RevonixYellow.jpg',
+          projectLink: ProfileData.projects[0].link!,
+          gitlabLink: ProfileData.projects[0].gitlabLink,
+          mediaSize: 200, // square like profile
+        ),
+        const SizedBox(height: 20),
+
+        LayoutBuilder(
+          builder: (context, constraints) {
+            double cardWidth = (constraints.maxWidth / 2) - 12;
+            return Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                SizedBox(
+                  width: cardWidth,
+                  child: _buildProjectCard(
+                    context,
+                    ProfileData.projects[1],
+                    imagePath: 'lib/assets/projects/Shein-logo.png',
+                    // keep default banner style; say the word and I'll square it too
+                  ),
                 ),
-              )
-                  : SlideInRight(
-                duration: Duration(milliseconds: 500 + (index * 200)),
-                child: _buildProjectCard(
-                  project,
-                  projectImages[index],
-                  glowColors[index],
+                const SizedBox(width: 20),
+                SizedBox(
+                  width: cardWidth,
+                  child: _buildProjectCard(
+                    context,
+                    ProfileData.projects[2],
+                    imagePath: 'lib/assets/projects/Change.png',
+                    mediaSize: 200, // square like profile (Change Volunteer)
+                  ),
                 ),
-              ),
-            ),
-          );
-        }).toList(),
+              ],
+            );
+          },
+        ),
       ],
     );
   }
@@ -194,7 +289,6 @@ class PortfolioHomePage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Hero Section
               Center(
                 child: Column(
                   children: [
@@ -237,36 +331,27 @@ class PortfolioHomePage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-
-                    // Social Icons Row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         _buildSocialButton(
-                          'lib/assets/icons/icons8-linkedin-100.svg',
-                          ProfileData.linkedin,
-                        ),
+                            'lib/assets/icons/icons8-linkedin-100.svg',
+                            ProfileData.linkedin),
                         const SizedBox(width: 16),
                         _buildSocialButton(
-                          'lib/assets/icons/icons8-github-100.svg',
-                          ProfileData.github,
-                        ),
+                            'lib/assets/icons/icons8-github-100.svg',
+                            ProfileData.github),
                         const SizedBox(width: 16),
                         _buildSocialButton(
-                          'lib/assets/icons/icons8-gitlab-100.svg',
-                          ProfileData.gitlab,
-                        ),
+                            'lib/assets/icons/icons8-gitlab-100.svg',
+                            ProfileData.gitlab),
                         const SizedBox(width: 16),
                         _buildSocialButton(
-                          'lib/assets/icons/icons8-gmail-96.svg',
-                          'mailto:${ProfileData.email}',
-                        ),
+                            'lib/assets/icons/icons8-gmail-96.svg',
+                            'mailto:${ProfileData.email}'),
                       ],
                     ),
-
                     const SizedBox(height: 20),
-
-                    // View My CV Button
                     BounceInUp(
                       duration: const Duration(milliseconds: 800),
                       child: ElevatedButton.icon(
@@ -289,10 +374,7 @@ class PortfolioHomePage extends StatelessWidget {
                   ],
                 ),
               ),
-
               const SizedBox(height: 40),
-
-              // Sections
               const ExperienceSection(),
               const SizedBox(height: 40),
               const SkillsSection(),
@@ -306,45 +388,43 @@ class PortfolioHomePage extends StatelessWidget {
   }
 }
 
-class _HoverZoomCard extends StatefulWidget {
-  final Widget child;
-  final Color glowColor;
-
-  const _HoverZoomCard({
-    required this.child,
-    required this.glowColor,
-  });
+class ProjectVideoDemo extends StatefulWidget {
+  final String videoPath;
+  const ProjectVideoDemo({super.key, required this.videoPath});
 
   @override
-  State<_HoverZoomCard> createState() => _HoverZoomCardState();
+  State<ProjectVideoDemo> createState() => _ProjectVideoDemoState();
 }
 
-class _HoverZoomCardState extends State<_HoverZoomCard> {
-  bool _hovering = false;
+class _ProjectVideoDemoState extends State<ProjectVideoDemo> {
+  late VideoPlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset(widget.videoPath)
+      ..initialize().then((_) {
+        setState(() {});
+        _controller.play();
+      });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovering = true),
-      onExit: (_) => setState(() => _hovering = false),
-      child: AnimatedScale(
-        scale: _hovering ? 1.05 : 1.0,
-        duration: const Duration(milliseconds: 200),
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 200),
-          decoration: BoxDecoration(
-            boxShadow: _hovering
-                ? [
-              BoxShadow(
-                color: widget.glowColor.withOpacity(0.6),
-                blurRadius: 20,
-                spreadRadius: 5,
-              )
-            ]
-                : [],
-          ),
-          child: widget.child,
-        ),
+    return Dialog(
+      backgroundColor: Colors.black87,
+      insetPadding: const EdgeInsets.all(20),
+      child: AspectRatio(
+        aspectRatio: _controller.value.aspectRatio,
+        child: _controller.value.isInitialized
+            ? VideoPlayer(_controller)
+            : const Center(child: CircularProgressIndicator()),
       ),
     );
   }

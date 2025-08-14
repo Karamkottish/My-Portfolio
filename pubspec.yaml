@@ -40,6 +40,7 @@ dependencies:
   animate_do: ^3.0.2
   pdfx: ^2.0.1
   visibility_detector: ^0.4.0+2
+  video_player: ^2.8.2
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -69,6 +70,9 @@ flutter:
     - assets/cv/KaramKottishCV.pdf
     - lib/assets/projects/RevonixYellow.jpg
     - lib/assets/projects/Change.png
+    - lib/assets/videos/fullvideoGrad.MP4
+    - assets/videos/fullvideoGrad.MP4
+    - lib/assets/projects/Shein-logo.png
 
 
 

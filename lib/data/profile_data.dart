@@ -50,7 +50,8 @@ class ProfileData {
       date: '10/2024 – 07/2025',
       summary:
       'A cross-platform Flutter application that lets clients browse, book, and manage home-service appointments (plumbers, electricians, carpenters, etc.), track their booking history, manage their profile & settings, and receive notifications.',
-      link: 'https://gitlab.com/revonix1/revonix-frontend',
+      link: 'https://revonix.app',
+      gitlabLink: 'https://gitlab.com/revonix1/revonix-frontend',
     ),
     Project(
       name: 'Shein Replica',
@@ -161,12 +162,15 @@ class Experience {
 class Project {
   final String name, role, date, summary;
   final String? link;
+  final String? gitlabLink; // New field for GitLab repo
+
   const Project({
     required this.name,
     required this.role,
     required this.date,
     required this.summary,
     this.link,
+    this.gitlabLink,
   });
 }
 
