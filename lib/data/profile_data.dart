@@ -1,3 +1,6 @@
+// lib/data/profile_data.dart
+import 'package:flutter/material.dart';
+
 class ProfileData {
   static const String name = 'Karam Kottish';
 
@@ -49,9 +52,10 @@ class ProfileData {
       role: 'Graduation Project (A-)',
       date: '10/2024 – 07/2025',
       summary:
-      'A cross-platform Flutter application that lets clients browse, book, and manage home-service appointments (plumbers, electricians, carpenters, etc.), track their booking history, manage their profile & settings, and receive notifications.',
+      'A cross-platform Flutter application that lets clients browse, book, and manage home-service appointments.',
       link: 'https://revonix.app',
       gitlabLink: 'https://gitlab.com/revonix1/revonix-frontend',
+      image: 'lib/assets/projects/RevonixYellow.jpg', // ✅ correct path
     ),
     Project(
       name: 'Shein Replica',
@@ -60,6 +64,7 @@ class ProfileData {
       summary:
       'A shopping experience replica with intuitive browsing and purchase flows.',
       link: 'https://github.com/Karamkottish/shein-replica',
+      image: 'lib/assets/projects/Shein-logo.png', // ✅ correct path
     ),
     Project(
       name: 'Change Volunteering App',
@@ -68,6 +73,7 @@ class ProfileData {
       summary:
       'Helps users discover and join volunteering opportunities in one tap.',
       link: 'https://github.com/Karamkottish/Change-ASPU/tree/flutter',
+      image: 'lib/assets/projects/Change.png', // ✅ correct path
     ),
   ];
 
@@ -89,29 +95,91 @@ class ProfileData {
 
   // ===================== COURSES =====================
   static const courses = [
-    'Front-end Engineering with React (Manara, 07/2025–08/2025)',
-    'Intro to Cryptography (Leeds/ClickStart/IofC, 02/2025)',
-    'Intro to Computational Thinking (Open University, 01/2025)',
-    'GIT Training (Simplilearn, 01/2025)',
-    'Ethical Hacking 101 (Simplilearn, 12/2024)',
-    'UI/UX — Vica Web Solutions (08/2024–12/2024)',
-    'Flutter Advanced — Focal X Agency (02/2024–06/2024)',
-    'Flutter Beginner — Merit Center (10/2023–01/2024)',
-    'CCNA — Hadara Intl. Center (03/2023–05/2023)',
+    Course(
+      title: 'Front-end Engineering with React',
+      provider: 'Manara',
+      date: '07/2025–08/2025',
+      image: 'lib/assets/courses/manara.png',
+    ),
+    Course(
+      title: 'Intro to Cryptography',
+      provider: 'Leeds/ClickStart/IofC',
+      date: '02/2025',
+    ),
+    Course(
+      title: 'Intro to Computational Thinking',
+      provider: 'Open University',
+      date: '01/2025',
+    ),
+    Course(
+      title: 'GIT Training',
+      provider: 'Simplilearn',
+      date: '01/2025',
+    ),
+    Course(
+      title: 'Ethical Hacking 101',
+      provider: 'Simplilearn',
+      date: '12/2024',
+    ),
+    Course(
+      title: 'UI/UX',
+      provider: 'Vica Web Solutions',
+      date: '08/2024–12/2024',
+    ),
+    Course(
+      title: 'Flutter Advanced',
+      provider: 'Focal X Agency',
+      date: '02/2024–06/2024',
+      image: 'lib/assets/courses/flutterad.jpg',
+    ),
+    Course(
+      title: 'Flutter Beginner',
+      provider: 'Merit Center',
+      date: '10/2023–01/2024',
+    ),
+    Course(
+      title: 'CCNA',
+      provider: 'Hadara Intl. Center',
+      date: '03/2023–05/2023',
+    ),
   ];
 
   // ===================== CERTIFICATES =====================
   static const certificates = [
-    'Innovating with Google Cloud AI (01/2025)',
-    'Scaling with Google Cloud Operations (12/2024)',
-    'Introduction to Database & SQL (06/2021)',
-    'Python Programming for Beginners (05/2021)',
-    'Cloud Security (03/2021)',
-    'Network & Cyber Security (03/2021)',
-    'Google Applications (03/2021)',
-    'Future of Display Advertising (03/2021)',
-    'What is the micro:bit? (03/2021)',
-    'TOT 60 hrs — TVTC (10/2020)',
+    Certificate(
+      title: 'Innovating with Google Cloud AI',
+      provider: 'Google Cloud',
+      date: '01/2025',
+    ),
+    Certificate(
+      title: 'Scaling with Google Cloud Operations',
+      provider: 'Google Cloud',
+      date: '12/2024',
+    ),
+    Certificate(
+      title: 'Introduction to Database & SQL',
+      provider: 'Open University',
+      date: '06/2021',
+    ),
+    Certificate(
+      title: 'Python Programming for Beginners',
+      provider: 'Open University',
+      date: '05/2021',
+    ),
+    Certificate(title: 'Cloud Security', provider: 'TVTC', date: '03/2021'),
+    Certificate(
+      title: 'Network & Cyber Security',
+      provider: 'TVTC',
+      date: '03/2021',
+    ),
+    Certificate(title: 'Google Applications', provider: 'TVTC', date: '03/2021'),
+    Certificate(
+      title: 'Future of Display Advertising',
+      provider: 'Google',
+      date: '03/2021',
+    ),
+    Certificate(title: 'What is the micro:bit?', provider: 'BBC', date: '03/2021'),
+    Certificate(title: 'TOT 60 hrs', provider: 'TVTC', date: '10/2020'),
   ];
 
   // ===================== SKILLS =====================
@@ -140,8 +208,8 @@ class ProfileData {
 
   // ===================== LANGUAGES =====================
   static const languages = [
-    'English',
-    'Arabic',
+    Language(name: 'English', level: 4),
+    Language(name: 'Arabic', level: 5),
   ];
 }
 
@@ -161,9 +229,7 @@ class Experience {
 
 class Project {
   final String name, role, date, summary;
-  final String? link;
-  final String? gitlabLink; // New field for GitLab repo
-
+  final String? link, gitlabLink, image;
   const Project({
     required this.name,
     required this.role,
@@ -171,6 +237,7 @@ class Project {
     required this.summary,
     this.link,
     this.gitlabLink,
+    this.image,
   });
 }
 
@@ -182,4 +249,30 @@ class Education {
     required this.location,
     required this.endDate,
   });
+}
+
+class Course {
+  final String title, provider, date;
+  final String? image;
+  const Course({
+    required this.title,
+    required this.provider,
+    required this.date,
+    this.image,
+  });
+}
+
+class Certificate {
+  final String title, provider, date;
+  const Certificate({
+    required this.title,
+    required this.provider,
+    required this.date,
+  });
+}
+
+class Language {
+  final String name;
+  final int level; // 1–5
+  const Language({required this.name, required this.level});
 }

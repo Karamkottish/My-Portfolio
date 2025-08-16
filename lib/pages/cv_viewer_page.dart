@@ -1,39 +1,57 @@
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
-import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class CVViewerPage extends StatelessWidget {
   const CVViewerPage({super.key});
 
-  static const String assetPath = 'lib/assets/cv/KaramKottishCV.pdf';
+  static const String cvUrl =
+      'https://drive.google.com/file/d/1suoB76RVTw4BK922sjrRt6hf-b1uU9qC/view?usp=sharing';
+
+  Future<void> _openCV(BuildContext context) async {
+    final uri = Uri.parse(cvUrl);
+
+    // On web, open in a new tab. On mobile/desktop, open in external app.
+    final launched = await launchUrl(
+      uri,
+      mode: kIsWeb ? LaunchMode.platformDefault : LaunchMode.externalApplication,
+      webOnlyWindowName: kIsWeb ? '_blank' : null,
+    );
+
+    if (!launched && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not open CV link')),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    // For GitHub Pages project sites, the app is served under /My-Portfolio/
-    final String webUrl =
-        '${Uri.base.origin}/My-Portfolio/$assetPath'; // e.g., https://karamkottish.github.io/My-Portfolio/assets/cv/KaramKottishCV.pdf
-
     return Scaffold(
       appBar: AppBar(title: const Text('My CV')),
-      body: kIsWeb
-          ? SfPdfViewer.network(
-        webUrl,
-        canShowScrollHead: true,
-        canShowScrollStatus: true,
-        onDocumentLoadFailed: (details) {
-          // Helpful message if the file path is wrong in the deployment
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to load PDF: ${details.description}')),
-          );
-        },
-      )
-          : SfPdfViewer.asset(
-        assetPath,
-        onDocumentLoadFailed: (details) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Failed to load PDF: ${details.description}')),
-          );
-        },
+      body: Center(
+        child: Padding(
+          padding: const EdgeInsets.all(24.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Open my latest CV on Google Drive',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 18),
+              ),
+              const SizedBox(height: 16),
+              ElevatedButton.icon(
+                onPressed: () => _openCV(context),
+                icon: const Icon(Icons.picture_as_pdf),
+                label: const Text('View My CV'),
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
