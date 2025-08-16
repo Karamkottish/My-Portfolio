@@ -95,6 +95,22 @@ class ProfileData {
 
   // ===================== COURSES =====================
   static const courses = [
+    // 🔹 Added Edrak UX (English)
+    Course(
+      title: 'User Experience Design (English)',
+      provider: 'EDRAAK',
+      date: '08/2025',
+      image: 'lib/assets/courses/EdrakuiuxEng.png',
+    ),
+    // 🔹 Added Edrak UX (Arabic)
+    Course(
+      title: 'تصميم تجربة المستخدم (Arabic)',
+      provider: 'إدراك',
+      date: '08/2025',
+      image: 'lib/assets/courses/EdrakuiuxArab.png',
+    ),
+
+    // Existing courses
     Course(
       title: 'Front-end Engineering with React',
       provider: 'Manara',
