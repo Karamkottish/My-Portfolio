@@ -1,4 +1,4 @@
-name: Build & Deploy Flutter Web to gh-pages
+name: Build & Deploy Flutter Web to gh-page
 
 on:
   push:
