@@ -1,0 +1,48 @@
+name: Build & Deploy Flutter Web to gh-pages
+
+on:
+  push:
+    branches: [ master ]   # change to "main" if your default branch is main
+  workflow_dispatch:       # allows manual runs from the Actions tab
+
+concurrency:
+  group: "pages-deploy"
+  cancel-in-progress: true
+
+permissions:
+  contents: write          # required to push to gh-pages
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Flutter version
+        run: flutter --version
+
+      - name: Install dependencies
+        run: |
+          flutter pub get
+
+      # Build WITHOUT service worker to avoid stale caches on Pages
+      - name: Build Flutter Web (no SW, base href for project page)
+        run: |
+          flutter build web --release --pwa-strategy=none --base-href=/My-Portfolio/
+
+      # Deploy build/web/ to gh-pages
+      - name: Deploy to gh-pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: build/web
+          force_orphan: true   # creates a clean gh-pages history (optional)
