@@ -1,35 +1,13 @@
 {
-    "name": "karam_portfolio",
-    "short_name": "karam_portfolio",
+    "name": "Karam Kottish Portfolio",
+    "short_name": "KK Portfolio",
     "start_url": ".",
     "display": "standalone",
-    "background_color": "#0175C2",
-    "theme_color": "#0175C2",
-    "description": "Karam Kottish Flutter Portfolio",
-    "orientation": "portrait-primary",
-    "prefer_related_applications": false,
+    "background_color": "#0f2027",
+    "theme_color": "#0f2027",
     "icons": [
-        {
-            "src": "icons/Icon-192.png",
-            "sizes": "192x192",
-            "type": "image/png"
-        },
-        {
-            "src": "icons/Icon-512.png",
-            "sizes": "512x512",
-            "type": "image/png"
-        },
-        {
-            "src": "icons/Icon-maskable-192.png",
-            "sizes": "192x192",
-            "type": "image/png",
-            "purpose": "maskable"
-        },
-        {
-            "src": "icons/Icon-maskable-512.png",
-            "sizes": "512x512",
-            "type": "image/png",
-            "purpose": "maskable"
-        }
+        { "src": "icons/icon-192.png?v=5", "sizes": "192x192", "type": "image/png" },
+        { "src": "icons/icon-512.png?v=5", "sizes": "512x512", "type": "image/png" },
+        { "src": "icons/maskable-512.png?v=5", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
     ]
 }
