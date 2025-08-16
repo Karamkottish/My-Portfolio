@@ -5,7 +5,7 @@ import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
 class CVViewerPage extends StatelessWidget {
   const CVViewerPage({super.key});
 
-  static const String assetPath = 'assets/cv/KaramKottishCV.pdf';
+  static const String assetPath = 'lib/assets/cv/KaramKottishCV.pdf';
 
   @override
   Widget build(BuildContext context) {
