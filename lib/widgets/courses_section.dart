@@ -21,6 +21,7 @@ class _CoursesSectionState extends State<CoursesSection> {
   final List<Map<String, String>> courses = [
     {"title": "User Experience Design (English) — EDRAAK", "file": "lib/assets/courses/EdrakuiuxEng.png"},
     {"title": "تصميم تجربة المستخدم (Arabic) — إدراك", "file": "lib/assets/courses/EdrakuiuxArab.png"},
+    {"title": "UX Researcher — Edraak", "file": "lib/assets/courses/edrakeuxresreacher.png"}, // ✅ Added new course
     {"title": "Flutter Advanced", "file": "lib/assets/courses/flutterad.jpg"},
     {"title": "Manara Fellowship", "file": "lib/assets/courses/manara.png"},
     {"title": "Git Training", "file": "lib/assets/courses/git.png"},
@@ -30,6 +31,7 @@ class _CoursesSectionState extends State<CoursesSection> {
     {"title": "Google Cloud AI", "file": "lib/assets/courses/googlecould.png"},
     {"title": "Google Cloud Operations", "file": "lib/assets/courses/googleoperations.png"},
   ];
+
 
   @override
   void initState() {
