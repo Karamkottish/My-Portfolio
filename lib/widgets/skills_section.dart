@@ -1,21 +1,47 @@
+// lib/widgets/skills_section.dart
 import 'package:flutter/material.dart';
 import 'package:animate_do/animate_do.dart';
 
 class SkillsSection extends StatelessWidget {
-  const SkillsSection({super.key});
+  const SkillsSection({
+    super.key,
+    this.skills, // optional override
+  });
 
-  List<_Skill> get _skills => const [
+  /// Optional: pass a custom list from outside (e.g., from ProfileData).
+  final List<_Skill>? skills;
+
+  // Default set (includes frontend + APIs gained at Springer Capital)
+  List<_Skill> get _defaultSkills => const [
+    // Mobile / Flutter
     _Skill(name: "Flutter", level: 0.90),
     _Skill(name: "Dart", level: 0.85),
     _Skill(name: "UI/UX Design", level: 0.80),
     _Skill(name: "Firebase", level: 0.75),
-    _Skill(name: "REST APIs", level: 0.80),
+
+    // APIs / Data
+    _Skill(name: "REST APIs", level: 0.85),
+    _Skill(name: "GraphQL", level: 0.65),
+    _Skill(name: "API Integration (REST/GraphQL)", level: 0.82),
+
+    // Frontend Web
+    _Skill(name: "React", level: 0.80),
+    _Skill(name: "Next.js", level: 0.78),
+    _Skill(name: "TypeScript", level: 0.82),
+    _Skill(name: "Tailwind CSS", level: 0.76),
+
+    // Quality / Perf / DevEx
+    _Skill(name: "Testing (Jest/RTL)", level: 0.70),
+    _Skill(name: "Accessibility (a11y)", level: 0.72),
+    _Skill(name: "Performance Optimization", level: 0.74),
+    _Skill(name: "Git/GitHub/GitLab & CI/CD", level: 0.78),
   ];
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final list = skills ?? _defaultSkills;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -46,9 +72,9 @@ class SkillsSection extends StatelessWidget {
                 mainAxisSpacing: 12,
                 mainAxisExtent: 92,
               ),
-              itemCount: _skills.length,
+              itemCount: list.length,
               itemBuilder: (context, i) {
-                final skill = _skills[i];
+                final skill = list[i];
                 return FadeInUp(
                   duration: Duration(milliseconds: 350 + (i * 40)),
                   child: _SkillCard(skill: skill, isDark: isDark),
@@ -76,8 +102,9 @@ class _SkillCardState extends State<_SkillCard> {
 
   @override
   Widget build(BuildContext context) {
-    final bg =
-    widget.isDark ? Colors.white.withOpacity(.06) : Colors.black.withOpacity(.04);
+    final bg = widget.isDark
+        ? Colors.white.withOpacity(.06)
+        : Colors.black.withOpacity(.04);
     final border = widget.isDark ? Colors.white24 : Colors.black12;
     final accent = _pickAccent(widget.skill.name);
 
@@ -152,8 +179,9 @@ class _SkillCardState extends State<_SkillCard> {
                         ),
                         TweenAnimationBuilder<double>(
                           tween: Tween<double>(
-                              begin: 0,
-                              end: widget.skill.level.clamp(0.0, 1.0)),
+                            begin: 0,
+                            end: widget.skill.level.clamp(0.0, 1.0),
+                          ),
                           duration: const Duration(milliseconds: 400),
                           curve: Curves.easeOutCubic,
                           builder: (context, value, _) {

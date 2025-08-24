@@ -27,6 +27,24 @@ class ProfileData {
 
   // ===================== EXPERIENCE =====================
   static const experiences = [
+    // 🔹 NEW: Current internship (shows first)
+    Experience(
+      title: 'Frontend Web Developer',
+      org: 'Springer Capital · Internship',
+      location: 'Chicago, IL, United States · Remote',
+      start: '08/2025',
+      end: 'Present', // ✅ still working
+      bullets: [
+        'Built responsive web apps with React/Next.js and TypeScript, translating Figma designs into clean, reusable components.',
+        'Integrated REST/GraphQL APIs with pagination, caching, and optimistic updates.',
+        'Improved performance via code-splitting, memoization, and bundle analysis.',
+        'Enhanced accessibility using semantic HTML, ARIA patterns, keyboard navigation, and color-contrast fixes.',
+        'Wrote unit/integration tests (Jest + React Testing Library) and added CI checks for quality gates.',
+        'Collaborated with GitHub flow (PR reviews, conventional commits) and shipped via CI/CD.',
+      ],
+    ),
+
+    // Existing experience
     Experience(
       title: 'Flutter App Developer',
       org: 'Focal X Agency',
@@ -55,7 +73,7 @@ class ProfileData {
       'A cross-platform Flutter application that lets clients browse, book, and manage home-service appointments.',
       link: 'https://revonix.app',
       gitlabLink: 'https://gitlab.com/revonix1/revonix-frontend',
-      image: 'lib/assets/projects/RevonixYellow.jpg', // ✅ correct path
+      image: 'lib/assets/projects/RevonixYellow.jpg',
     ),
     Project(
       name: 'Shein Replica',
@@ -64,7 +82,7 @@ class ProfileData {
       summary:
       'A shopping experience replica with intuitive browsing and purchase flows.',
       link: 'https://github.com/Karamkottish/shein-replica',
-      image: 'lib/assets/projects/Shein-logo.png', // ✅ correct path
+      image: 'lib/assets/projects/Shein-logo.png',
     ),
     Project(
       name: 'Change Volunteering App',
@@ -73,7 +91,7 @@ class ProfileData {
       summary:
       'Helps users discover and join volunteering opportunities in one tap.',
       link: 'https://github.com/Karamkottish/Change-ASPU/tree/flutter',
-      image: 'lib/assets/projects/Change.png', // ✅ correct path
+      image: 'lib/assets/projects/Change.png',
     ),
   ];
 
@@ -95,14 +113,14 @@ class ProfileData {
 
   // ===================== COURSES =====================
   static const courses = [
-    // 🔹 Added Edrak UX (English)
+    // 🔹 Edrak UX (English)
     Course(
       title: 'User Experience Design (English)',
       provider: 'EDRAAK',
       date: '08/2025',
       image: 'lib/assets/courses/EdrakuiuxEng.png',
     ),
-    // 🔹 Added Edrak UX (Arabic)
+    // 🔹 Edrak UX (Arabic)
     Course(
       title: 'تصميم تجربة المستخدم (Arabic)',
       provider: 'إدراك',
@@ -184,31 +202,44 @@ class ProfileData {
     ),
     Certificate(title: 'Cloud Security', provider: 'TVTC', date: '03/2021'),
     Certificate(
-      title: 'Network & Cyber Security',
-      provider: 'TVTC',
-      date: '03/2021',
-    ),
+        title: 'Network & Cyber Security', provider: 'TVTC', date: '03/2021'),
     Certificate(title: 'Google Applications', provider: 'TVTC', date: '03/2021'),
     Certificate(
-      title: 'Future of Display Advertising',
-      provider: 'Google',
-      date: '03/2021',
-    ),
+        title: 'Future of Display Advertising', provider: 'Google', date: '03/2021'),
     Certificate(title: 'What is the micro:bit?', provider: 'BBC', date: '03/2021'),
     Certificate(title: 'TOT 60 hrs', provider: 'TVTC', date: '10/2020'),
   ];
 
   // ===================== SKILLS =====================
+  // Expanded with Frontend + APIs gained during internship
   static const skills = [
+    // Mobile / Flutter
     'Flutter/Dart',
     'Firebase',
-    'REST APIs',
-    'Git/GitHub/GitLab',
     'State Management (Riverpod/GetX)',
     'UI/UX & Responsive Design',
-    'Front-end Development',
-    'API Integration',
     'Mobile Development',
+
+    // Frontend Web
+    'Front-end Development',
+    'React',
+    'Next.js',
+    'TypeScript',
+    'Tailwind CSS',
+
+    // APIs / Data
+    'REST APIs',
+    'GraphQL',
+    'API Integration',
+
+    // Quality / Perf / DevEx
+    'Testing (Jest, React Testing Library)',
+    'Accessibility (a11y)',
+    'Performance Optimization',
+    'Git/GitHub/GitLab',
+    'CI/CD',
+
+    // General
     'Microsoft Office',
   ];
 
