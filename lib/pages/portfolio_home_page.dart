@@ -4,11 +4,14 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:flutter/foundation.dart';
 import '../data/profile_data.dart';
+import '../widgets/animated_subtitle.dart';
 import '../widgets/animated_tagline.dart';
 import '../widgets/experience_section.dart';
 import '../widgets/skills_section.dart';
 import '../widgets/courses_section.dart';
 import 'package:video_player/video_player.dart';
+import 'package:animated_text_kit/animated_text_kit.dart';
+
 
 class PortfolioHomePage extends StatelessWidget {
   const PortfolioHomePage({super.key});
@@ -414,6 +417,7 @@ class PortfolioHomePage extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
                     const AnimatedTagline(),
+                    const AnimatedSubtitle(),
                     const SizedBox(height: 18),
                     _profileIntro(),
                     const SizedBox(height: 20),
@@ -796,6 +800,50 @@ class _HoverScale extends StatefulWidget {
 
   @override
   State<_HoverScale> createState() => _HoverScaleState();
+}
+// ==================== 🔹 Animated Subtitle ====================
+class AnimatedSubtitle extends StatelessWidget {
+  const AnimatedSubtitle({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        AnimatedTextKit(
+          repeatForever: true,
+          pause: const Duration(milliseconds: 1200),
+          animatedTexts: [
+            TypewriterAnimatedText(
+              "Flutter (Main) / Web Developer (Fresher)",
+              textAlign: TextAlign.center,
+              textStyle: const TextStyle(
+                fontSize: 18,
+                color: Colors.tealAccent,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.5,
+              ),
+              speed: Duration(milliseconds: 80),
+              cursor: "|", // blinking cursor
+            ),
+            TypewriterAnimatedText(
+              "Semi Front–Full Stack • Learning more…",
+              textAlign: TextAlign.center,
+              textStyle: const TextStyle(
+                fontSize: 15,
+                color: Colors.white70,
+                fontStyle: FontStyle.italic,
+                height: 1.4,
+              ),
+              speed: Duration(milliseconds: 80),
+              cursor: "|", // blinking cursor
+            ),
+          ],
+          displayFullTextOnTap: true,
+          stopPauseOnTap: true,
+        ),
+      ],
+    );
+  }
 }
 
 class _HoverScaleState extends State<_HoverScale> {
