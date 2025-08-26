@@ -6,7 +6,7 @@ class CVViewerPage extends StatelessWidget {
   const CVViewerPage({super.key});
 
   static const String cvUrl =
-      'https://drive.google.com/file/d/1suoB76RVTw4BK922sjrRt6hf-b1uU9qC/view?usp=sharing';
+      'https://drive.google.com/drive/u/1/folders/1uZGXrOOGeZM85Ttu1ttgi8Z9au5CHjct';
 
   Future<void> _openCV(BuildContext context) async {
     final uri = Uri.parse(cvUrl);

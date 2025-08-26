@@ -58,7 +58,7 @@ class PortfolioHomePage extends StatelessWidget {
   // 🔹 Open CV Link
   Future<void> _openCV(BuildContext context) async {
     const String cvLink =
-        'https://drive.google.com/file/d/1suoB76RVTw4BK922sjrRt6hf-b1uU9qC/view?usp=sharing';
+        'https://drive.google.com/file/d/1poZ04SmRsSOIlX_r2RMkc4BL9byvsoUT/view?usp=sharing';
     await _launchURL(context, cvLink);
   }
 
