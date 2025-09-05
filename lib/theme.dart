@@ -1,33 +1,50 @@
 import 'package:flutter/material.dart';
 
-final lightColorScheme = ColorScheme.fromSeed(
-  seedColor: const Color(0xFF0EA5E9),
-  brightness: Brightness.light,
-);
+// A happy, vibrant seed color (you can tweak it)
+const Color kSeedColor = Color(0xFFff6ac1); // pink
 
-final darkColorScheme = ColorScheme.fromSeed(
-  seedColor: const Color(0xFF0EA5E9),
-  brightness: Brightness.dark,
-);
+ThemeData buildAppTheme(Brightness brightness) {
+  final scheme = ColorScheme.fromSeed(
+    seedColor: kSeedColor,
+    brightness: brightness,
+  );
 
-ThemeData appTheme(Brightness b) {
-  final cs = b == Brightness.dark ? darkColorScheme : lightColorScheme;
   return ThemeData(
-    colorScheme: cs,
     useMaterial3: true,
-    scaffoldBackgroundColor: cs.surface,
-    textTheme: const TextTheme(
-      displayLarge:
-      TextStyle(fontWeight: FontWeight.w800, letterSpacing: -1.0),
-      titleLarge: TextStyle(fontWeight: FontWeight.w700),
-      bodyLarge: TextStyle(height: 1.5),
-    ),
+    colorScheme: scheme,
+    // Softer, friendlier corner radius across the app
     cardTheme: CardThemeData(
-      elevation: 0,
-      color: cs.surfaceContainerLowest,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
+      elevation: 1,
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      surfaceTintColor: scheme.surfaceTint,
+    ),
+    filledButtonTheme: FilledButtonThemeData(
+      style: FilledButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+        textStyle: const TextStyle(fontWeight: FontWeight.w700),
       ),
+    ),
+    outlinedButtonTheme: OutlinedButtonThemeData(
+      style: OutlinedButton.styleFrom(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+        side: BorderSide(color: scheme.outlineVariant),
+        textStyle: const TextStyle(fontWeight: FontWeight.w600),
+      ),
+    ),
+    snackBarTheme: SnackBarThemeData(
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: scheme.inverseSurface,
+      contentTextStyle: TextStyle(color: scheme.onInverseSurface),
+    ),
+    textTheme: const TextTheme(
+      headlineLarge: TextStyle(fontWeight: FontWeight.w900, letterSpacing: -0.6),
+      titleLarge: TextStyle(fontWeight: FontWeight.w800),
+      titleMedium: TextStyle(fontWeight: FontWeight.w700),
+      bodyLarge: TextStyle(height: 1.5),
+      bodyMedium: TextStyle(height: 1.5),
     ),
   );
 }

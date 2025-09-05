@@ -1,77 +1,77 @@
 import 'package:flutter/material.dart';
-import 'package:animate_do/animate_do.dart';
-import '../data/profile_data.dart';
-import 'section_title.dart';
 
 class ExperienceSection extends StatelessWidget {
   const ExperienceSection({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    final items = <_Exp>[
+      _Exp(
+        role: 'Frontend Developer intern',
+        company: 'Springer Capital ',
+        date: 'August 2025 – present',
+        points: [
+          'Built with NextJs, React, and TailwindCSS.',
+          'Integrated REST endpoints and caching.',
+          'Improved accessibility and dark mode support.',
+        ],
+      ),
+      _Exp(
+        role: 'Junior Flutter Dev ',
+        company: 'Solo',
+        date: '2023 – Present',
+        points: [
+          'Delivered e-commerce and portfolio apps.',
+          'Implemented CI steps and ',
+          'Collaborated via GitHub/GitLab, code reviews.',
+        ],
+      ),
+    ];
+
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionTitle("Experience"),
-        const SizedBox(height: 10),
-        ...ProfileData.experiences.asMap().entries.map((entry) {
-          final index = entry.key;
-          final exp = entry.value;
-
-          // Alternate animation direction for variety
-          final animation = index.isEven
-              ? SlideInLeft(
-            duration: const Duration(milliseconds: 700),
-            delay: Duration(milliseconds: index * 200),
-            child: _buildCard(exp),
-          )
-              : SlideInRight(
-            duration: const Duration(milliseconds: 700),
-            delay: Duration(milliseconds: index * 200),
-            child: _buildCard(exp),
-          );
-
-          return animation;
-        }),
+        for (final it in items) ...[
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: DefaultTextStyle(
+                style: t.bodyMedium!,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${it.role} • ${it.company}', style: t.titleMedium),
+                    const SizedBox(height: 4),
+                    Text(it.date, style: t.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                    const SizedBox(height: 10),
+                    ...it.points.map((p) => Padding(
+                      padding: const EdgeInsets.only(bottom: 6),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Text('•  '),
+                          Expanded(child: Text(p)),
+                        ],
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
       ],
     );
   }
+}
 
-  Widget _buildCard(exp) {
-    return Card(
-      color: Colors.white10,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(exp.title,
-                style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white)),
-            Text("${exp.org} • ${exp.location}",
-                style: const TextStyle(color: Colors.white70)),
-            Text("${exp.start} - ${exp.end}",
-                style: const TextStyle(color: Colors.white60)),
-            const SizedBox(height: 8),
-            ...exp.bullets.map(
-                  (b) => Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text("• ", style: TextStyle(color: Colors.white70)),
-                  Expanded(
-                    child: Text(b,
-                        style: const TextStyle(color: Colors.white70)),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
+class _Exp {
+  final String role;
+  final String company;
+  final String date;
+  final List<String> points;
+  _Exp({required this.role, required this.company, required this.date, required this.points});
 }

@@ -18,10 +18,11 @@ class _CoursesSectionState extends State<CoursesSection> {
   Timer? _autoTimer;
   Timer? _resumeDelay;
 
+  /// 🔧 Add/remove entries here – the count updates automatically.
   final List<Map<String, String>> courses = [
     {"title": "User Experience Design (English) — EDRAAK", "file": "lib/assets/courses/EdrakuiuxEng.png"},
     {"title": "تصميم تجربة المستخدم (Arabic) — إدراك", "file": "lib/assets/courses/EdrakuiuxArab.png"},
-    {"title": "UX Researcher — Edraak", "file": "lib/assets/courses/edrakeuxresreacher.png"}, // ✅ Added new course
+    {"title": "UX Researcher — Edraak", "file": "lib/assets/courses/edrakeuxresreacher.png"},
     {"title": "Flutter Advanced", "file": "lib/assets/courses/flutterad.jpg"},
     {"title": "Manara Fellowship", "file": "lib/assets/courses/manara.png"},
     {"title": "Git Training", "file": "lib/assets/courses/git.png"},
@@ -30,8 +31,8 @@ class _CoursesSectionState extends State<CoursesSection> {
     {"title": "Computational Thinking", "file": "lib/assets/courses/computiional.png"},
     {"title": "Google Cloud AI", "file": "lib/assets/courses/googlecould.png"},
     {"title": "Google Cloud Operations", "file": "lib/assets/courses/googleoperations.png"},
+    {"title": "Modern JavaScript — Manara", "file": "lib/assets/courses/modernJS.png"},
   ];
-
 
   @override
   void initState() {
@@ -94,16 +95,24 @@ class _CoursesSectionState extends State<CoursesSection> {
 
     final width = MediaQuery.of(context).size.width;
     final height = width < 600 ? 220.0 : min(380.0, width * 0.35);
+    final total = courses.length;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          'Courses',
-          style: theme.textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.bold,
-            color: isDark ? Colors.white : Colors.black,
-          ),
+        // ===== Title + Dynamic Count Badge =====
+        Row(
+          children: [
+            Text(
+              'Courses',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: isDark ? Colors.white : Colors.black,
+              ),
+            ),
+            const SizedBox(width: 10),
+            _CountBadge(count: total),
+          ],
         ),
         const SizedBox(height: 16),
 
@@ -193,6 +202,43 @@ class _CoursesSectionState extends State<CoursesSection> {
   }
 }
 
+// ===== Count badge with pluralization =====
+class _CountBadge extends StatelessWidget {
+  const _CountBadge({required this.count});
+  final int count;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final label = count == 1 ? "1 course" : "$count courses";
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFFFF6AC1), Color(0xFF00E5FF)],
+        ),
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: [
+          BoxShadow(
+            color: cs.primary.withOpacity(.15),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
+}
+
 // ===== Card for carousel =====
 class _ImageCard extends StatelessWidget {
   final String filePath;
@@ -227,8 +273,7 @@ class _ImageCard extends StatelessWidget {
               errorBuilder: (_, __, ___) => Container(
                 color: Colors.grey.shade800,
                 child: const Center(
-                  child: Icon(Icons.broken_image,
-                      color: Colors.white54, size: 48),
+                  child: Icon(Icons.broken_image, color: Colors.white54, size: 48),
                 ),
               ),
             ),
