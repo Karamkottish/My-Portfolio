@@ -82,7 +82,6 @@ flutter:
     - lib/assets/courses/flutterad.jpg
     - lib/assets/courses/Beginners guide to Ethical hacking.pdf
     - lib/assets/courses/an-intro-to-cryptography_certificate_of_achievement_g8uu7zw.pdf
-    - lib/assets/courses/img.png
     - lib/assets/courses/hacking.png
     - lib/assets/courses/git.png
     - lib/assets/courses/computiional.png
@@ -93,6 +92,13 @@ flutter:
     - lib/assets/courses/edrakeuxresreacher.png
     - assets/animations/Stamp.json
     - lib/assets/courses/modernJS.png
+    - lib/assets/Diploma/uiuxDiploma.png
+    - lib/assets/Diploma/userxperienceDesign.png
+    - lib/assets/Diploma/userxperienceReserach.png
+    - lib/assets/Diploma/userdesignFundementals.png
+    - lib/assets/Diploma/designPrincepls.png
+    - lib/assets/Diploma/uiuxDiploma.png
+    - lib/assets/courses/img.png
 
 
 

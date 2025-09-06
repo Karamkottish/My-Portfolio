@@ -25,8 +25,8 @@ class ExperienceSection extends StatelessWidget {
         date: '2023 – Present',
         points: [
           'Delivered e-commerce and portfolio apps.',
-          'Implemented CI steps and ',
-          'Collaborated via GitHub/GitLab, code reviews.',
+          'Implemented CI & CD steps ',
+          'Collaborated via GitHub/GitLab,',
         ],
       ),
     ];

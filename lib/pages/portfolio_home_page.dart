@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../theme.dart';
 import '../widgets/social_icon_button.dart';
-import '../widgets/portfolio_hero.dart';
+// Hide CoursesSection if an older portfolio_hero.dart accidentally exported it
+import '../widgets/portfolio_hero.dart' hide CoursesSection;
 import '../widgets/sticky_rainbow_nav.dart';
 import '../widgets/colorful_background.dart';
 import '../widgets/elegant_background.dart';
@@ -10,7 +11,6 @@ import '../widgets/experience_section.dart';
 import '../widgets/skills_section.dart';
 import '../widgets/courses_section.dart';
 import '../widgets/blob_background.dart';
-
 
 class PortfolioApp extends StatelessWidget {
   const PortfolioApp({super.key});
@@ -43,6 +43,7 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
   final _skillsKey = GlobalKey();
   final _projectsKey = GlobalKey();
   final _coursesKey = GlobalKey();
+  final _diplomaKey = GlobalKey(); // ⬅️ NEW: diploma anchor
 
   static const String cvUrl =
       'https://drive.google.com/file/d/1poZ04SmRsSOIlX_r2RMkc4BL9byvsoUT/view?usp=sharing';
@@ -54,6 +55,7 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
         ctx,
         duration: const Duration(milliseconds: 550),
         curve: Curves.easeOutCubic,
+        alignment: 0.05, // keep headings nicely visible
       );
     }
   }
@@ -81,6 +83,9 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
               break;
             case 'courses':
               _jumpTo(_coursesKey);
+              break;
+            case 'diploma': // ⬅️ NEW: scroll to diploma
+              _jumpTo(_diplomaKey);
               break;
           }
         },
@@ -133,7 +138,7 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                             SocialIconButton(
                               assetPath: 'lib/assets/icons/icons8-github-100.svg',
                               tooltip: 'GitHub',
-                              url: 'https://github.com/Karamkottish',
+                              url: 'https://github.com/KaramKottish',
                             ),
                             SocialIconButton(
                               assetPath: 'lib/assets/icons/icons8-linkedin-100.svg',
@@ -269,6 +274,18 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                             CoursesSection(),
                           ],
                         ),
+                      ),
+                    ),
+
+                    // 🔹 Divider before Diploma (optional)
+                    const SliverToBoxAdapter(child: AnimatedGradientDivider()),
+
+                    // === DIPLOMA (under Courses) ===
+                    SliverToBoxAdapter(
+                      key: _diplomaKey, // ⬅️ key attached so nav can scroll here
+                      child: const Padding(
+                        padding: EdgeInsets.fromLTRB(20, 12, 20, 0),
+                        child: DiplomaSection(number: 1),
                       ),
                     ),
 
@@ -430,7 +447,6 @@ class _AnimatedGradientDividerState extends State<AnimatedGradientDivider>
             painter: _DividerPainter(progress: _ctrl.value),
             child: const SizedBox(
               height: 4,
-              // keeps the line away from screen edges (elegant)
               width: double.infinity,
             ),
           );
@@ -481,8 +497,9 @@ class _DividerPainter extends CustomPainter {
         ],
       ).createShader(highlightRect);
     canvas.drawRRect(
-        RRect.fromRectAndRadius(highlightRect, const Radius.circular(10)),
-        highlight);
+      RRect.fromRectAndRadius(highlightRect, const Radius.circular(10)),
+      highlight,
+    );
   }
 
   @override

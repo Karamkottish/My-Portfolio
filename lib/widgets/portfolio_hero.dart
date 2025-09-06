@@ -1,8 +1,9 @@
+// lib/widgets/portfolio_hero.dart
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// Colorful, happy hero with rainbow headline, candy buttons, and confetti shapes.
+/// ================= HERO =================
 class PortfolioHero extends StatefulWidget {
   const PortfolioHero({
     super.key,
@@ -42,21 +43,14 @@ class _PortfolioHeroState extends State<PortfolioHero>
       builder: (_, __) {
         return Stack(
           children: [
-            // playful pastel background blobs
             Positioned.fill(
-              child: CustomPaint(
-                painter: _BlobPainter(progress: _anim.value),
-              ),
+              child: CustomPaint(painter: _BlobPainter(progress: _anim.value)),
             ),
-            // confetti dots
             Positioned.fill(
               child: IgnorePointer(
-                child: CustomPaint(
-                  painter: _ConfettiPainter(progress: _anim.value),
-                ),
+                child: CustomPaint(painter: _ConfettiPainter(progress: _anim.value)),
               ),
             ),
-            // content
             Column(
               children: [
                 Padding(
@@ -75,8 +69,7 @@ class _PortfolioHeroState extends State<PortfolioHero>
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 900),
                           child: Text(
-                            'Clean UI, smooth motion, and real-world performance — '
-                                'with a sprinkle of Engineering .',
+                            'Clean UI, smooth motion, and real-world performance — with a sprinkle of Engineering .',
                             textAlign: TextAlign.center,
                             style: Theme.of(context)
                                 .textTheme
@@ -131,10 +124,12 @@ class _PortfolioHeroState extends State<PortfolioHero>
 
   static Future<void> _launch(BuildContext context, String url) async {
     final uri = Uri.parse(url);
-    if (!await launchUrl(uri,
-        mode: url.startsWith('mailto:')
-            ? LaunchMode.platformDefault
-            : LaunchMode.externalApplication)) {
+    if (!await launchUrl(
+      uri,
+      mode: url.startsWith('mailto:')
+          ? LaunchMode.platformDefault
+          : LaunchMode.externalApplication,
+    )) {
       if (!context.mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text('Could not open: $url')));
@@ -142,7 +137,8 @@ class _PortfolioHeroState extends State<PortfolioHero>
   }
 }
 
-/// Animated rainbow headline (solid intro + gradient marquee)
+/// ================= HERO SUPPORT WIDGETS =================
+
 class _RainbowHeadline extends StatelessWidget {
   const _RainbowHeadline({
     required this.line1,
@@ -162,6 +158,7 @@ class _RainbowHeadline extends StatelessWidget {
     // Animate gradient offset for a subtle shimmer
     final dx = (progress * 600) % 600;
 
+    // Robust shader: if rect.height is 0 (rare on web), give a sane fallback height
     return Column(
       children: [
         Text(
@@ -176,27 +173,37 @@ class _RainbowHeadline extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 6),
-        ShaderMask(
-          shaderCallback: (rect) => const LinearGradient(
-            colors: [
-              Color(0xFFFF6AC1),
-              Color(0xFFFFD166),
-              Color(0xFF06D6A0),
-              Color(0xFF00E5FF),
-              Color(0xFF8B5CF6),
-            ],
-          ).createShader(Rect.fromLTWH(-200 + dx, 0, rect.width + 400, rect.height)),
-          child: Text(
-            line2,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: mobile ? 36 : 64,
-              height: 1.06,
-              fontWeight: FontWeight.w900,
-              color: Colors.white, // masked by shader
-              letterSpacing: -.6,
-            ),
-          ),
+        LayoutBuilder(
+          builder: (_, box) {
+            final gradient = const LinearGradient(
+              colors: [
+                Color(0xFFFF6AC1),
+                Color(0xFFFFD166),
+                Color(0xFF06D6A0),
+                Color(0xFF00E5FF),
+                Color(0xFF8B5CF6),
+              ],
+            );
+            return ShaderMask(
+              blendMode: BlendMode.srcIn,
+              shaderCallback: (rect) {
+                final h = rect.height == 0 ? (mobile ? 42.0 : 70.0) : rect.height;
+                final r = Rect.fromLTWH(-200 + dx, 0, rect.width + 400, h);
+                return gradient.createShader(r);
+              },
+              child: Text(
+                line2,
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: mobile ? 36 : 64,
+                  height: 1.06,
+                  fontWeight: FontWeight.w900,
+                  color: Colors.white, // masked by shader
+                  letterSpacing: -.6,
+                ),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -246,7 +253,7 @@ class _CandyCTA extends StatelessWidget {
   }
 }
 
-// ===== Decorative Painters =====
+/// ================= DECORATIVE PAINTERS =================
 
 class _WavePainter extends CustomPainter {
   _WavePainter({required this.leftColor, required this.rightColor});
@@ -288,7 +295,6 @@ class _BlobPainter extends CustomPainter {
       (color: const Color(0xFFE7FFF8), center: Offset(size.width * .8, size.height * .22), r: 200.0),
       (color: const Color(0xFFEFF4FF), center: Offset(size.width * .55, size.height * .48), r: 280.0),
     ];
-
     for (var i = 0; i < blobs.length; i++) {
       final dx = sin(progress * 2 * pi + i) * 12;
       final dy = cos(progress * 2 * pi + i) * 8;
@@ -298,8 +304,7 @@ class _BlobPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _BlobPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+  bool shouldRepaint(covariant _BlobPainter oldDelegate) => oldDelegate.progress != progress;
 }
 
 class _ConfettiPainter extends CustomPainter {
@@ -308,7 +313,6 @@ class _ConfettiPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final rnd = Random(42);
     final colors = const [
       Color(0xFFFF6AC1),
       Color(0xFFFFD166),
@@ -329,6 +333,368 @@ class _ConfettiPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ConfettiPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+  bool shouldRepaint(covariant _ConfettiPainter oldDelegate) => oldDelegate.progress != progress;
+}
+
+/// ==========================================================================
+/// DIPLOMA (Courses-style: colorful card + gradient number pill + animation)
+/// ==========================================================================
+/// Use this widget UNDER your CoursesSection in the page file:
+///   const DiplomaSection(number: 1),
+class DiplomaSection extends StatefulWidget {
+  const DiplomaSection({super.key, this.number = 1});
+  final int number;
+
+  @override
+  State<DiplomaSection> createState() => _DiplomaSectionState();
+}
+
+class _DiplomaSectionState extends State<DiplomaSection>
+    with SingleTickerProviderStateMixin {
+  bool _expanded = false;
+
+  late final AnimationController _anim =
+  AnimationController(vsync: this, duration: const Duration(seconds: 3))
+    ..repeat();
+
+  static const String mainDiploma = 'lib/assets/Diploma/uiuxDiploma.png';
+  static const List<String> gallery = [
+    'lib/assets/Diploma/userxperienceDesign.png',
+    'lib/assets/Diploma/userxperienceReserach.png',
+    'lib/assets/Diploma/userdesignFundementals.png',
+    'lib/assets/Diploma/designPrincepls.png',
+  ];
+
+  @override
+  void dispose() {
+    _anim.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    final isMobile = width < 720;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 1100),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header like Courses: title + gradient pill with number
+            Row(
+              children: [
+                Text(
+                  'Diploma',
+                  style: Theme.of(context)
+                      .textTheme
+                      .headlineSmall
+                      ?.copyWith(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(width: 10),
+                _GradientPill(text: widget.number.toString().padLeft(2, '0')),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Main colorful card (matches Courses visual language)
+            GestureDetector(
+              onTap: () => setState(() => _expanded = !_expanded),
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 820),
+                  child: AnimatedBuilder(
+                    animation: _anim,
+                    builder: (_, __) {
+                      final t = _anim.value * 2 * pi;
+                      final dy = sin(t) * 6; // float
+                      final scale = 0.995 + (cos(t) * 0.005);
+                      return Transform.translate(
+                        offset: Offset(0, dy),
+                        child: Transform.scale(
+                          scale: scale,
+                          child: _DiplomaCoursesStyleCard(
+                            imagePath: mainDiploma,
+                            title: 'UI/UX Diploma',
+                            subtitle: _expanded
+                                ? 'Tap to collapse'
+                                : 'Tap to view certificate set',
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ),
+            ),
+
+            // Gallery (compact grid)
+            AnimatedCrossFade(
+              firstChild: const SizedBox.shrink(),
+              secondChild: Padding(
+                padding: const EdgeInsets.only(top: 12),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1000),
+                    child: LayoutBuilder(
+                      builder: (_, box) {
+                        final crossAxisCount = isMobile ? 2 : 4;
+                        const spacing = 10.0;
+                        final rawItemW = (box.maxWidth -
+                            spacing * (crossAxisCount - 1)) /
+                            crossAxisCount;
+                        final itemW = isMobile
+                            ? rawItemW
+                            : rawItemW.clamp(0, 220).toDouble();
+                        final itemH = itemW * (2 / 3); // 3:2 ratio
+
+                        return Wrap(
+                          spacing: spacing,
+                          runSpacing: spacing,
+                          children: [
+                            for (final p in gallery)
+                              SizedBox(
+                                width: itemW,
+                                height: itemH,
+                                child: _GalleryThumb(imagePath: p),
+                              ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+              ),
+              crossFadeState:
+              _expanded ? CrossFadeState.showSecond : CrossFadeState.showFirst,
+              duration: const Duration(milliseconds: 220),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Small gradient pill to display "01", "02", ...
+class _GradientPill extends StatelessWidget {
+  const _GradientPill({required this.text});
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        gradient:
+        const LinearGradient(colors: [Color(0xFFFF6AC1), Color(0xFF00E5FF)]),
+        borderRadius: BorderRadius.circular(999),
+        boxShadow: const [
+          BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 3)),
+        ],
+      ),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w700,
+          fontSize: 13,
+        ),
+      ),
+    );
+  }
+}
+
+/// Courses-style card: rounded, border, shadow, top rainbow strip, bottom overlay
+class _DiplomaCoursesStyleCard extends StatelessWidget {
+  const _DiplomaCoursesStyleCard({
+    required this.imagePath,
+    required this.title,
+    required this.subtitle,
+  });
+
+  final String imagePath;
+  final String title;
+  final String subtitle;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final border = isDark ? Colors.white24 : Colors.black12;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: border, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.20),
+            blurRadius: 14,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+
+      // 🔧 Give Stack a finite size with AspectRatio
+      child: AspectRatio(
+        aspectRatio: 4 / 3,
+        child: Stack(
+          children: [
+            // Image
+            Positioned.fill(
+              child: Image.asset(
+                imagePath,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => Container(
+                  color: Colors.grey.shade800,
+                  child: const Center(
+                    child: Icon(Icons.broken_image,
+                        color: Colors.white54, size: 48),
+                  ),
+                ),
+              ),
+            ),
+
+            // Rainbow header strip
+            const Positioned(
+              left: 0,
+              right: 0,
+              top: 0,
+              height: 6,
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Color(0xFFFF6AC1),
+                      Color(0xFFFFD166),
+                      Color(0xFF06D6A0),
+                      Color(0xFF00E5FF),
+                      Color(0xFF8B5CF6),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            // Bottom overlay
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.black.withOpacity(0.55), Colors.transparent],
+                    begin: Alignment.bottomCenter,
+                    end: Alignment.topCenter,
+                  ),
+                ),
+              ),
+            ),
+
+            // Bottom title + hint
+            Positioned(
+              left: 14,
+              bottom: 12,
+              right: 14,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          title,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            shadows: [
+                              Shadow(
+                                blurRadius: 6,
+                                color: Colors.black54,
+                                offset: Offset(1, 1),
+                              )
+                            ],
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          subtitle,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            color: Colors.white70,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  const Icon(Icons.zoom_in, size: 18, color: Colors.white70),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+
+class _GalleryThumb extends StatelessWidget {
+  const _GalleryThumb({required this.imagePath});
+  final String imagePath;
+
+  @override
+  Widget build(BuildContext context) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(10),
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          Image.asset(imagePath, fit: BoxFit.cover),
+          Positioned(
+            right: 6,
+            bottom: 6,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.black45,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Icon(Icons.zoom_in, size: 12, color: Colors.white),
+            ),
+          ),
+          Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: () {
+                showDialog(
+                  context: context,
+                  barrierColor: Colors.black87,
+                  builder: (_) => GestureDetector(
+                    onTap: () => Navigator.of(context).pop(),
+                    child: InteractiveViewer(
+                      minScale: 0.8,
+                      maxScale: 4,
+                      child: Center(
+                        child: Image.asset(imagePath, fit: BoxFit.contain),
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }

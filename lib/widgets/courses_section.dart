@@ -11,6 +11,13 @@ class CoursesSection extends StatefulWidget {
   State<CoursesSection> createState() => _CoursesSectionState();
 }
 
+class _Course {
+  final String title;
+  final String file; // image or pdf
+
+  const _Course(this.title, this.file);
+}
+
 class _CoursesSectionState extends State<CoursesSection> {
   late final PageController _controller;
   int _index = 0;
@@ -18,20 +25,21 @@ class _CoursesSectionState extends State<CoursesSection> {
   Timer? _autoTimer;
   Timer? _resumeDelay;
 
-  /// 🔧 Add/remove entries here – the count updates automatically.
-  final List<Map<String, String>> courses = [
-    {"title": "User Experience Design (English) — EDRAAK", "file": "lib/assets/courses/EdrakuiuxEng.png"},
-    {"title": "تصميم تجربة المستخدم (Arabic) — إدراك", "file": "lib/assets/courses/EdrakuiuxArab.png"},
-    {"title": "UX Researcher — Edraak", "file": "lib/assets/courses/edrakeuxresreacher.png"},
-    {"title": "Flutter Advanced", "file": "lib/assets/courses/flutterad.jpg"},
-    {"title": "Manara Fellowship", "file": "lib/assets/courses/manara.png"},
-    {"title": "Git Training", "file": "lib/assets/courses/git.png"},
-    {"title": "Ethical Hacking", "file": "lib/assets/courses/hacking.png"},
-    {"title": "Intro to Cryptography", "file": "lib/assets/courses/img.png"},
-    {"title": "Computational Thinking", "file": "lib/assets/courses/computiional.png"},
-    {"title": "Google Cloud AI", "file": "lib/assets/courses/googlecould.png"},
-    {"title": "Google Cloud Operations", "file": "lib/assets/courses/googleoperations.png"},
-    {"title": "Modern JavaScript — Manara", "file": "lib/assets/courses/modernJS.png"},
+  /// ☑️ Strongly typed list – no nulls, no "!" required
+  final List<_Course> courses = const [
+    _Course("User Experience Design (English) — EDRAAK", "lib/assets/courses/EdrakuiuxEng.png"),
+    _Course("تصميم تجربة المستخدم (Arabic) — إدراك", "lib/assets/courses/EdrakuiuxArab.png"),
+    _Course("UX Researcher — Edraak", "lib/assets/courses/edrakeuxresreacher.png"),
+    _Course("Flutter Advanced", "lib/assets/courses/flutterad.jpg"),
+    _Course("Manara Fellowship", "lib/assets/courses/manara.png"),
+    _Course("Git Training", "lib/assets/courses/git.png"),
+    _Course("Ethical Hacking", "lib/assets/courses/hacking.png"),
+    // 🔽 If this was the bad one, ensure the path is correct and folder case matches
+    _Course("UI/UX Diploma (cover)", "lib/assets/Diploma/uiuxDiploma.png"),
+    _Course("Computational Thinking", "lib/assets/courses/computiional.png"),
+    _Course("Google Cloud AI", "lib/assets/courses/googlecould.png"),
+    _Course("Google Cloud Operations", "lib/assets/courses/googleoperations.png"),
+    _Course("Modern JavaScript — Manara", "lib/assets/courses/modernJS.png"),
   ];
 
   @override
@@ -129,16 +137,17 @@ class _CoursesSectionState extends State<CoursesSection> {
               onPageChanged: (i) => setState(() => _index = i),
               itemBuilder: (context, i) {
                 final course = courses[i];
+
+                // Defensive: assert non-empty paths (so you get a clear error during development)
+                assert(course.file.isNotEmpty, "Course file path is empty for '${course.title}'");
+
                 return GestureDetector(
-                  onTap: () => _openCourse(context, course["file"]!, course["title"]!),
+                  onTap: () => _openCourse(context, course.file, course.title),
                   child: AnimatedScale(
                     scale: i == _index ? 1.0 : 0.93,
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOut,
-                    child: _ImageCard(
-                      filePath: course["file"]!,
-                      title: course["title"]!,
-                    ),
+                    child: _ImageCard(filePath: course.file, title: course.title),
                   ),
                 );
               },
@@ -169,9 +178,7 @@ class _CoursesSectionState extends State<CoursesSection> {
                   height: 8,
                   width: i == _index ? 24 : 8,
                   decoration: BoxDecoration(
-                    color: i == _index
-                        ? Colors.tealAccent
-                        : dotColor.withOpacity(0.35),
+                    color: i == _index ? Colors.tealAccent : dotColor.withOpacity(0.35),
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -184,19 +191,16 @@ class _CoursesSectionState extends State<CoursesSection> {
   }
 
   void _openCourse(BuildContext context, String file, String title) {
-    if (file.toLowerCase().endsWith(".pdf")) {
+    final lower = file.toLowerCase();
+    if (lower.endsWith(".pdf")) {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => PdfViewerPage(filePath: file, title: title),
-        ),
+        MaterialPageRoute(builder: (_) => PdfViewerPage(filePath: file, title: title)),
       );
     } else {
       Navigator.push(
         context,
-        MaterialPageRoute(
-          builder: (_) => ImageViewerPage(filePath: file, title: title),
-        ),
+        MaterialPageRoute(builder: (_) => ImageViewerPage(filePath: file, title: title)),
       );
     }
   }
@@ -316,7 +320,7 @@ class _ImageCard extends StatelessWidget {
   }
 }
 
-/// 📌 PDF Viewer Page
+/// PDF Viewer Page
 class PdfViewerPage extends StatelessWidget {
   final String filePath;
   final String title;
@@ -331,7 +335,7 @@ class PdfViewerPage extends StatelessWidget {
   }
 }
 
-/// 📌 Image Fullscreen Viewer
+/// Image Fullscreen Viewer
 class ImageViewerPage extends StatelessWidget {
   final String filePath;
   final String title;
@@ -344,6 +348,9 @@ class ImageViewerPage extends StatelessWidget {
       body: PhotoView(
         imageProvider: AssetImage(filePath),
         backgroundDecoration: const BoxDecoration(color: Colors.black),
+        errorBuilder: (_, __, ___) => const Center(
+          child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
+        ),
       ),
     );
   }

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 typedef SectionTap = void Function(String id);
 
-/// Fully centered rainbow nav bar with title + links
+/// Centered nav bar with solid black text (includes "Diploma")
 class StickyRainbowNav extends StatelessWidget implements PreferredSizeWidget {
   const StickyRainbowNav({
     super.key,
@@ -18,55 +18,81 @@ class StickyRainbowNav extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
+    const Color kText = Colors.black;      // <- always black
+    const Color kTextDim = Colors.black87; // slight contrast
 
-    Widget link(String id, String label) => TextButton(
-      onPressed: () => onTap(id),
-      child: Text(
-        label,
-        style: const TextStyle(
-          fontSize: 16,
-          fontWeight: FontWeight.w600,
-          color: Colors.black87, // darker, more readable
+    Widget navItem(String id, String label) {
+      return TextButton(
+        onPressed: () => onTap(id),
+        style: TextButton.styleFrom(
+          foregroundColor: kText, // text/ink
+          overlayColor: Colors.black12, // press ripple
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         ),
-      ),
-    );
+        child: Text(
+          label,
+          style: const TextStyle(
+            color: kText,          // <- force black
+            fontSize: 16,
+            fontWeight: FontWeight.w800,
+            letterSpacing: .2,
+          ),
+        ),
+      );
+    }
 
     return Material(
       color: Colors.transparent,
       child: Container(
-        height: 72,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [Color(0xFFFFFFFF), Color(0xFFFDF7FF)], // light elegant
+        height: preferredSize.height,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color(0xFFFFFFFF), Color(0xFFF7F1FF)], // soft bg
             begin: Alignment.topLeft,
             end: Alignment.bottomRight,
           ),
           border: Border(
-            bottom: BorderSide(color: cs.outlineVariant.withOpacity(0.3)),
+            bottom: BorderSide(color: Color(0x1F000000)), // subtle divider
           ),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center, // ✅ everything centered
-          children: [
-            // Title
-            Text(
-              title,
-              style: const TextStyle(
-                fontWeight: FontWeight.w900,
-                fontSize: 18,
-                color: Colors.black87,
-              ),
-            ),
-            const SizedBox(width: 48),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1200),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                // Title
+                Text(
+                  title,
+                  style: const TextStyle(
+                    color: kTextDim, // slightly softer black
+                    fontWeight: FontWeight.w900,
+                    fontSize: 20,
+                    letterSpacing: .2,
+                  ),
+                ),
+                const SizedBox(width: 48),
 
-            // Nav links
-            link('about', 'About'),
-            link('experience', 'Experience'),
-            link('skills', 'Skills'),
-            link('projects', 'Projects'),
-            link('courses', 'Courses'),
-          ],
+                // Links (scrolls if too narrow)
+                Flexible(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    physics: const BouncingScrollPhysics(),
+                    child: Row(
+                      children: [
+                        navItem('about', 'About'),
+                        navItem('experience', 'Experience'),
+                        navItem('skills', 'Skills'),
+                        navItem('projects', 'Projects'),
+                        navItem('courses', 'Courses'),
+                        navItem('diploma', 'Diploma'), // NEW
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
         ),
       ),
     );
