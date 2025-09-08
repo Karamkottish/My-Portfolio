@@ -100,6 +100,10 @@ flutter:
     - lib/assets/Diploma/uiuxDiploma.png
     - lib/assets/courses/img.png
     - lib/assets/courses/Agile.png
+    - lib/assets/videos/CVPMobileV1.MP4
+    - lib/assets/images/focal_x_agency_logo.jpeg
+    - lib/assets/images/vica.jpeg
+    - lib/assets/images/springer_capital_logo.jpeg
 
 
 

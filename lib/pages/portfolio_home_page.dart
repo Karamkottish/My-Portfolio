@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:visibility_detector/visibility_detector.dart';
+import 'package:video_player/video_player.dart';
 import '../theme.dart';
 import '../widgets/social_icon_button.dart';
-// Hide CoursesSection if an older portfolio_hero.dart accidentally exported it
 import '../widgets/portfolio_hero.dart' hide CoursesSection;
 import '../widgets/sticky_rainbow_nav.dart';
 import '../widgets/colorful_background.dart';
@@ -11,6 +12,7 @@ import '../widgets/experience_section.dart';
 import '../widgets/skills_section.dart';
 import '../widgets/courses_section.dart';
 import '../widgets/blob_background.dart';
+import '../widgets/inline_video_player.dart';
 
 class PortfolioApp extends StatelessWidget {
   const PortfolioApp({super.key});
@@ -37,13 +39,12 @@ class PortfolioHomePage extends StatefulWidget {
 class _PortfolioHomePageState extends State<PortfolioHomePage> {
   final _scrollCtrl = ScrollController();
 
-  // section anchors
   final _aboutKey = GlobalKey();
   final _expKey = GlobalKey();
   final _skillsKey = GlobalKey();
   final _projectsKey = GlobalKey();
   final _coursesKey = GlobalKey();
-  final _diplomaKey = GlobalKey(); // ⬅️ NEW: diploma anchor
+  final _diplomaKey = GlobalKey();
 
   static const String cvUrl =
       'https://drive.google.com/file/d/1poZ04SmRsSOIlX_r2RMkc4BL9byvsoUT/view?usp=sharing';
@@ -55,17 +56,14 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
         ctx,
         duration: const Duration(milliseconds: 550),
         curve: Curves.easeOutCubic,
-        alignment: 0.05, // keep headings nicely visible
+        alignment: 0.05,
       );
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final t = Theme.of(context);
-
     return Scaffold(
-      // Sticky rainbow nav
       appBar: StickyRainbowNav(
         onTap: (id) {
           switch (id) {
@@ -84,7 +82,7 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
             case 'courses':
               _jumpTo(_coursesKey);
               break;
-            case 'diploma': // ⬅️ NEW: scroll to diploma
+            case 'diploma':
               _jumpTo(_diplomaKey);
               break;
           }
@@ -92,10 +90,7 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
       ),
       body: Stack(
         children: [
-          // Elegant mesh background
           const Positioned.fill(child: BlobBackground(speed: 0.18)),
-
-          // content
           SafeArea(
             child: LayoutBuilder(
               builder: (context, c) {
@@ -113,7 +108,6 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                 return CustomScrollView(
                   controller: _scrollCtrl,
                   slivers: [
-                    // === HERO (About) ===
                     SliverToBoxAdapter(
                       key: _aboutKey,
                       child: PortfolioHero(
@@ -124,10 +118,8 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                       ),
                     ),
 
-                    // 🔹 Animated divider
                     const SliverToBoxAdapter(child: AnimatedGradientDivider()),
 
-                    // === SOCIALS ===
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.only(bottom: 8),
@@ -155,88 +147,50 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                       ),
                     ),
 
-                    // === EXPERIENCE ===
+                    const SliverToBoxAdapter(child: AnimatedGradientDivider()),
+
                     SliverToBoxAdapter(
                       key: _expKey,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            _SectionHeader(icon: Icons.badge_outlined, title: 'Experience'),
-                            SizedBox(height: 10),
-                            ExperienceSection(),
-                          ],
-                        ),
+                      child: const Padding(
+                        padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
+                        child: ExperienceSection(),
                       ),
                     ),
 
-                    // 🔹 Animated divider
                     const SliverToBoxAdapter(child: AnimatedGradientDivider()),
 
-                    // === TECHNICAL SKILLS ===
                     SliverToBoxAdapter(
                       key: _skillsKey,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            _SectionHeader(icon: Icons.code_outlined, title: 'Technical Skills'),
-                            SizedBox(height: 10),
-                            SkillsSection(),
-                          ],
-                        ),
+                      child: const Padding(
+                        padding: EdgeInsets.fromLTRB(20, 24, 20, 0),
+                        child: SkillsSection(),
                       ),
                     ),
 
-                    // 🔹 Animated divider
                     const SliverToBoxAdapter(child: AnimatedGradientDivider()),
 
-                    // === SOFT SKILLS + LANGS ===
-                    SliverToBoxAdapter(
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            _SectionHeader(icon: Icons.handshake_outlined, title: 'Soft Skills'),
-                            SizedBox(height: 10),
-                            SoftSkillsSection(),
-                            SizedBox(height: 18),
-                            _SectionHeader(icon: Icons.language_outlined, title: 'Languages'),
-                            SizedBox(height: 10),
-                            LanguagesSection(),
-                          ],
-                        ),
-                      ),
-                    ),
-
-                    // 🔹 Animated divider
-                    const SliverToBoxAdapter(child: AnimatedGradientDivider()),
-
-                    // === PROJECTS HEADER ===
                     SliverToBoxAdapter(
                       key: _projectsKey,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 28, 20, 8),
-                        child: const _SectionHeader(icon: Icons.auto_awesome, title: 'Projects'),
+                      child: const Padding(
+                        padding: EdgeInsets.fromLTRB(20, 28, 20, 8),
+                        child: _SectionHeader(icon: Icons.auto_awesome, title: 'Projects'),
                       ),
                     ),
 
-                    // === PROJECTS GRID ===
                     SliverPadding(
                       padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
                       sliver: SliverGrid(
                         gridDelegate: grid,
                         delegate: SliverChildListDelegate(const [
                           _ProjectCard(
-                            title: '🎓 Graduation App',
+                            title: '🎓 Graduation App " Revonix "',
                             subtitle: 'Flutter Lead • 2025',
                             description: 'Connecting Labors with Clients, offline cache, video demo.',
                             image: 'lib/assets/projects/RevonixYellow.jpg',
                             gradient: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
-                            tags: ['Flutter', 'Clean Architure ', 'NodeJs', 'Riverpod','Stripe','Firebase Notifications '],
+                            tags: ['Flutter', 'Clean Architecture', 'NodeJs', 'Riverpod','Stripe','Firebase Notifications','Languages','Dio'],
+                            isVideo: true,
+                            videoPath: 'lib/assets/videos/fullvideoGrad.MP4',
                           ),
                           _ProjectCard(
                             title: '🛍️ E-commerce Clone',
@@ -247,42 +201,33 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                             tags: ['Stripe', 'Firebase', 'Responsive'],
                           ),
                           _ProjectCard(
-                            title: '🔄 Change Volenteering App',
+                            title: 'Semester Project 🔄 Change Volenteering App',
                             subtitle: 'Flutter Lead • 2023',
-                            description: 'An App that helps Volenteerers connect with companies to volenteer with , theming, analytics.',
+                            description: 'An App that helps Volunteers connect with companies, theming, analytics.',
                             image: 'lib/assets/projects/Change.png',
                             gradient: [Color(0xFFFF6AC1), Color(0xFFFFD166)],
-                            tags: ['Getx', 'Charts', 'Theming'],
+                            tags: ['Getx', 'Charts', 'Theming','Languages','Http'],
+                            isVideo: true,
+                            videoPath: 'lib/assets/videos/CVPMobileV1.mp4',
                           ),
                         ]),
                       ),
                     ),
 
-                    // 🔹 Animated divider
                     const SliverToBoxAdapter(child: AnimatedGradientDivider()),
 
-                    // === COURSES ===
                     SliverToBoxAdapter(
                       key: _coursesKey,
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            _SectionHeader(icon: Icons.school_outlined, title: 'Courses'),
-                            SizedBox(height: 10),
-                            CoursesSection(),
-                          ],
-                        ),
+                      child: const Padding(
+                        padding: EdgeInsets.fromLTRB(20, 24, 20, 0),
+                        child: CoursesSection(),
                       ),
                     ),
 
-                    // 🔹 Divider before Diploma (optional)
                     const SliverToBoxAdapter(child: AnimatedGradientDivider()),
 
-                    // === DIPLOMA (under Courses) ===
                     SliverToBoxAdapter(
-                      key: _diplomaKey, // ⬅️ key attached so nav can scroll here
+                      key: _diplomaKey,
                       child: const Padding(
                         padding: EdgeInsets.fromLTRB(20, 12, 20, 0),
                         child: DiplomaSection(number: 1),
@@ -319,8 +264,7 @@ class _SectionHeader extends StatelessWidget {
   }
 }
 
-/// Colorful card with gradient header strip + emoji tags
-class _ProjectCard extends StatelessWidget {
+class _ProjectCard extends StatefulWidget {
   const _ProjectCard({
     required this.title,
     required this.subtitle,
@@ -328,6 +272,8 @@ class _ProjectCard extends StatelessWidget {
     required this.image,
     required this.gradient,
     required this.tags,
+    this.isVideo = false,
+    this.videoPath,
   });
 
   final String title;
@@ -336,77 +282,133 @@ class _ProjectCard extends StatelessWidget {
   final String image;
   final List<Color> gradient;
   final List<String> tags;
+  final bool isVideo;
+  final String? videoPath;
+
+  @override
+  State<_ProjectCard> createState() => _ProjectCardState();
+}
+
+class _ProjectCardState extends State<_ProjectCard> {
+  bool _playVideo = false;
+
+  void _onVisibilityChanged(VisibilityInfo info) {
+    if (widget.isVideo && widget.videoPath != null) {
+      if (info.visibleFraction > 0.6 && !_playVideo) {
+        setState(() => _playVideo = true);
+      } else if (info.visibleFraction < 0.2 && _playVideo) {
+        setState(() => _playVideo = false);
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return Material(
-      color: cs.surface,
-      elevation: 2,
-      borderRadius: BorderRadius.circular(18),
-      child: InkWell(
+
+    return VisibilityDetector(
+      key: Key(widget.title),
+      onVisibilityChanged: _onVisibilityChanged,
+      child: Material(
+        color: cs.surface,
+        elevation: 2,
         borderRadius: BorderRadius.circular(18),
-        onTap: () {},
-        child: Ink(
-          padding: const EdgeInsets.all(12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // gradient header strip
-              Container(
-                height: 6,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(colors: gradient),
-                  borderRadius: BorderRadius.circular(8),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(18),
+          onTap: () {
+            if (widget.isVideo) {
+              setState(() => _playVideo = !_playVideo);
+            }
+          },
+          child: Ink(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
+                  height: 6,
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: widget.gradient),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 10),
-              Expanded(
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    image,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Container(
-                      color: cs.surfaceVariant,
-                      alignment: Alignment.center,
-                      child: const Text('No Image'),
+                const SizedBox(height: 10),
+
+                Expanded(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: widget.isVideo && widget.videoPath != null && _playVideo
+                        ? Stack(
+                      children: [
+                        InlineVideoPlayer(assetPath: widget.videoPath!),
+                        Positioned(
+                          right: 8,
+                          bottom: 8,
+                          child: IconButton(
+                            icon: const Icon(Icons.fullscreen,
+                                color: Colors.white, size: 32),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => FullscreenVideoPlayer(
+                                      assetPath: widget.videoPath!),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
+                    )
+                        : Stack(
+                      fit: StackFit.expand,
+                      children: [
+                        Image.asset(
+                          widget.image,
+                          fit: BoxFit.cover,
+                        ),
+                        if (widget.isVideo)
+                          const Center(
+                            child: Icon(Icons.play_circle,
+                                size: 64, color: Colors.white70),
+                          ),
+                      ],
                     ),
                   ),
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(title, style: Theme.of(context).textTheme.titleMedium),
-              Text(
-                subtitle,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: cs.onSurfaceVariant,
+
+                const SizedBox(height: 8),
+                Text(widget.title,
+                    style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  widget.subtitle,
+                  style: Theme.of(context)
+                      .textTheme
+                      .bodySmall
+                      ?.copyWith(color: cs.onSurfaceVariant),
                 ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                description,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: [
-                  for (final tag in tags)
-                    Chip(
-                      label: Text(tag),
-                      visualDensity: VisualDensity.compact,
-                      side: BorderSide(color: cs.outlineVariant),
-                      backgroundColor: cs.surfaceVariant.withOpacity(.35),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(999),
+                const SizedBox(height: 6),
+                Text(widget.description,
+                    maxLines: 2, overflow: TextOverflow.ellipsis),
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: [
+                    for (final tag in widget.tags)
+                      Chip(
+                        label: Text(tag),
+                        visualDensity: VisualDensity.compact,
+                        side: BorderSide(color: cs.outlineVariant),
+                        backgroundColor: cs.surfaceVariant.withOpacity(.35),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(999),
+                        ),
                       ),
-                    ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -414,7 +416,91 @@ class _ProjectCard extends StatelessWidget {
   }
 }
 
-/// Animated rainbow divider with a subtle shimmer
+class FullscreenVideoPlayer extends StatefulWidget {
+  final String assetPath;
+  const FullscreenVideoPlayer({super.key, required this.assetPath});
+
+  @override
+  State<FullscreenVideoPlayer> createState() => _FullscreenVideoPlayerState();
+}
+
+class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
+  late VideoPlayerController _controller;
+  bool _isMuted = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = VideoPlayerController.asset(widget.assetPath)
+      ..initialize().then((_) {
+        setState(() {});
+        _controller.play();
+      });
+    _controller.setLooping(true);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _toggleMute() {
+    setState(() {
+      _isMuted = !_isMuted;
+      _controller.setVolume(_isMuted ? 0.0 : 1.0);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
+      ),
+      body: Center(
+        child: _controller.value.isInitialized
+            ? AspectRatio(
+          aspectRatio: _controller.value.aspectRatio,
+          child: VideoPlayer(_controller),
+        )
+            : const CircularProgressIndicator(color: Colors.white),
+      ),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          FloatingActionButton(
+            backgroundColor: Colors.white,
+            onPressed: () {
+              setState(() {
+                _controller.value.isPlaying
+                    ? _controller.pause()
+                    : _controller.play();
+              });
+            },
+            child: Icon(
+              _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+              color: Colors.black,
+            ),
+          ),
+          const SizedBox(height: 12),
+          FloatingActionButton(
+            backgroundColor: Colors.white,
+            onPressed: _toggleMute,
+            child: Icon(
+              _isMuted ? Icons.volume_off : Icons.volume_up,
+              color: Colors.black,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class AnimatedGradientDivider extends StatefulWidget {
   const AnimatedGradientDivider({super.key});
 
@@ -465,23 +551,20 @@ class _DividerPainter extends CustomPainter {
     final margin = 60.0;
     final rect = Rect.fromLTWH(margin, 0, size.width - margin * 2, size.height);
 
-    // Base rainbow gradient
     final base = Paint()
       ..shader = const LinearGradient(
         colors: [
-          Color(0xFFFF6AC1), // pink
-          Color(0xFFFFD166), // yellow
-          Color(0xFF06D6A0), // teal
-          Color(0xFF00E5FF), // blue
-          Color(0xFF8B5CF6), // violet
+          Color(0xFFFF6AC1),
+          Color(0xFFFFD166),
+          Color(0xFF06D6A0),
+          Color(0xFF00E5FF),
+          Color(0xFF8B5CF6),
         ],
-      ).createShader(rect)
-      ..strokeCap = StrokeCap.round;
+      ).createShader(rect);
 
     final rrect = RRect.fromRectAndRadius(rect, const Radius.circular(10));
     canvas.drawRRect(rrect, base);
 
-    // Moving soft highlight (subtle shimmer)
     final bandWidth = rect.width * 0.18;
     final x = rect.left + (rect.width + bandWidth) * progress - bandWidth;
     final highlightRect = Rect.fromLTWH(x, rect.top, bandWidth, rect.height);
