@@ -291,6 +291,7 @@ class _ProjectCard extends StatefulWidget {
 
 class _ProjectCardState extends State<_ProjectCard> {
   bool _playVideo = false;
+  VideoPlayerController? _inlineController;
 
   void _onVisibilityChanged(VisibilityInfo info) {
     if (widget.isVideo && widget.videoPath != null) {
@@ -300,6 +301,12 @@ class _ProjectCardState extends State<_ProjectCard> {
         setState(() => _playVideo = false);
       }
     }
+  }
+
+  @override
+  void dispose() {
+    _inlineController?.dispose();
+    super.dispose();
   }
 
   @override
@@ -341,20 +348,29 @@ class _ProjectCardState extends State<_ProjectCard> {
                         ? Stack(
                       children: [
                         InlineVideoPlayer(assetPath: widget.videoPath!),
+
                         Positioned(
                           right: 8,
                           bottom: 8,
                           child: IconButton(
                             icon: const Icon(Icons.fullscreen,
                                 color: Colors.white, size: 32),
-                            onPressed: () {
-                              Navigator.push(
+                            onPressed: () async {
+                              final pos = _inlineController?.value.position ?? Duration.zero;
+
+                              final returnedPos = await Navigator.push<Duration>(
                                 context,
                                 MaterialPageRoute(
                                   builder: (_) => FullscreenVideoPlayer(
-                                      assetPath: widget.videoPath!),
+                                    assetPath: widget.videoPath!,
+                                    startPosition: pos,
+                                  ),
                                 ),
                               );
+
+                              if (returnedPos != null && _inlineController != null) {
+                                await _inlineController!.seekTo(returnedPos);
+                              }
                             },
                           ),
                         ),
@@ -418,7 +434,13 @@ class _ProjectCardState extends State<_ProjectCard> {
 
 class FullscreenVideoPlayer extends StatefulWidget {
   final String assetPath;
-  const FullscreenVideoPlayer({super.key, required this.assetPath});
+  final Duration startPosition;
+
+  const FullscreenVideoPlayer({
+    super.key,
+    required this.assetPath,
+    this.startPosition = Duration.zero,
+  });
 
   @override
   State<FullscreenVideoPlayer> createState() => _FullscreenVideoPlayerState();
@@ -432,7 +454,10 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
   void initState() {
     super.initState();
     _controller = VideoPlayerController.asset(widget.assetPath)
-      ..initialize().then((_) {
+      ..initialize().then((_) async {
+        if (widget.startPosition > Duration.zero) {
+          await _controller.seekTo(widget.startPosition);
+        }
         setState(() {});
         _controller.play();
       });
@@ -454,48 +479,54 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        iconTheme: const IconThemeData(color: Colors.white),
-      ),
-      body: Center(
-        child: _controller.value.isInitialized
-            ? AspectRatio(
-          aspectRatio: _controller.value.aspectRatio,
-          child: VideoPlayer(_controller),
-        )
-            : const CircularProgressIndicator(color: Colors.white),
-      ),
-      floatingActionButton: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          FloatingActionButton(
-            backgroundColor: Colors.white,
-            onPressed: () {
-              setState(() {
-                _controller.value.isPlaying
-                    ? _controller.pause()
-                    : _controller.play();
-              });
-            },
-            child: Icon(
-              _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
-              color: Colors.black,
+    return WillPopScope(
+      onWillPop: () async {
+        Navigator.pop(context, _controller.value.position);
+        return false;
+      },
+      child: Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          iconTheme: const IconThemeData(color: Colors.white),
+        ),
+        body: Center(
+          child: _controller.value.isInitialized
+              ? AspectRatio(
+            aspectRatio: _controller.value.aspectRatio,
+            child: VideoPlayer(_controller),
+          )
+              : const CircularProgressIndicator(color: Colors.white),
+        ),
+        floatingActionButton: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            FloatingActionButton(
+              backgroundColor: Colors.white,
+              onPressed: () {
+                setState(() {
+                  _controller.value.isPlaying
+                      ? _controller.pause()
+                      : _controller.play();
+                });
+              },
+              child: Icon(
+                _controller.value.isPlaying ? Icons.pause : Icons.play_arrow,
+                color: Colors.black,
+              ),
             ),
-          ),
-          const SizedBox(height: 12),
-          FloatingActionButton(
-            backgroundColor: Colors.white,
-            onPressed: _toggleMute,
-            child: Icon(
-              _isMuted ? Icons.volume_off : Icons.volume_up,
-              color: Colors.black,
+            const SizedBox(height: 12),
+            FloatingActionButton(
+              backgroundColor: Colors.white,
+              onPressed: _toggleMute,
+              child: Icon(
+                _isMuted ? Icons.volume_off : Icons.volume_up,
+                color: Colors.black,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
