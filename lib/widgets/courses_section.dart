@@ -27,6 +27,7 @@ class _CoursesSectionState extends State<CoursesSection> {
 
   /// ☑️ Strongly typed list – no nulls, no "!" required
   final List<_Course> courses = const [
+    _Course("Agile (Foundations)", "lib/assets/courses/Agile.png"), // ✅ NEW
     _Course("User Experience Design (English) — EDRAAK", "lib/assets/courses/EdrakuiuxEng.png"),
     _Course("تصميم تجربة المستخدم (Arabic) — إدراك", "lib/assets/courses/EdrakuiuxArab.png"),
     _Course("UX Researcher — Edraak", "lib/assets/courses/edrakeuxresreacher.png"),
@@ -348,9 +349,10 @@ class ImageViewerPage extends StatelessWidget {
       body: PhotoView(
         imageProvider: AssetImage(filePath),
         backgroundDecoration: const BoxDecoration(color: Colors.black),
-        errorBuilder: (_, __, ___) => const Center(
-          child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
-        ),
+        // If your PhotoView version supports it, you can keep an errorBuilder:
+        // errorBuilder: (_, __, ___) => const Center(
+        //   child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
+        // ),
       ),
     );
   }

@@ -8,7 +8,7 @@ class SkillsSection extends StatelessWidget {
     final cs = Theme.of(context).colorScheme;
     final skills = [
       'Flutter', 'Dart', 'Firebase', 'REST', 'Git', 'CI/CD',
-      'Provider', 'Riverpod', 'Clean Architecture', 'SQLite', 'Ui/Ux', 'Getx', 'ReactJs', 'NextJs', 'TailWind Css','TypeScript','Animations','Jira',
+      'Provider', 'Riverpod', 'Clean Architecture', 'SQLite', 'Ui/Ux', 'Getx', 'ReactJs', 'NextJs', 'TailWind Css','TypeScript','Animations','Jira','Agile Methodology','Linux','Github','Gitlab','M-V-C','M-V-V-M'
     ];
     return Wrap(
       spacing: 8,
