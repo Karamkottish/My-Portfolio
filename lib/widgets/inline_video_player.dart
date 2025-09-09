@@ -3,11 +3,7 @@ import 'package:video_player/video_player.dart';
 
 class InlineVideoPlayer extends StatefulWidget {
   final String assetPath;
-
-  const InlineVideoPlayer({
-    super.key,
-    required this.assetPath,
-  });
+  const InlineVideoPlayer({super.key, required this.assetPath});
 
   @override
   State<InlineVideoPlayer> createState() => _InlineVideoPlayerState();
@@ -28,7 +24,7 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer> {
         }
       });
     _controller.setLooping(true);
-    _controller.setVolume(0); // start muted
+    _controller.setVolume(0);
   }
 
   void _toggleMute() {
@@ -49,14 +45,12 @@ class _InlineVideoPlayerState extends State<InlineVideoPlayer> {
     if (!_controller.value.isInitialized) {
       return const Center(child: CircularProgressIndicator());
     }
-
     return Stack(
       children: [
         AspectRatio(
           aspectRatio: _controller.value.aspectRatio,
           child: VideoPlayer(_controller),
         ),
-        // mute/unmute button bottom-left
         Positioned(
           left: 8,
           bottom: 8,

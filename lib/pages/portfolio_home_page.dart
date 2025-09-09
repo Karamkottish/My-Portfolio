@@ -3,15 +3,14 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:video_player/video_player.dart';
 import '../theme.dart';
+import '../widgets/inline_video_player.dart' show InlineVideoPlayer;
 import '../widgets/social_icon_button.dart';
 import '../widgets/portfolio_hero.dart' hide CoursesSection;
 import '../widgets/sticky_rainbow_nav.dart';
 import '../widgets/blob_background.dart';
-import '../widgets/inline_video_player.dart';
 import '../widgets/experience_section.dart';
 import '../widgets/skills_section.dart';
 import '../widgets/courses_section.dart';
-import '../widgets/inline_video_player.dart';
 
 class PortfolioApp extends StatelessWidget {
   const PortfolioApp({super.key});
