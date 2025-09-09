@@ -6,12 +6,11 @@ import '../theme.dart';
 import '../widgets/social_icon_button.dart';
 import '../widgets/portfolio_hero.dart' hide CoursesSection;
 import '../widgets/sticky_rainbow_nav.dart';
-import '../widgets/colorful_background.dart';
-import '../widgets/elegant_background.dart';
+import '../widgets/blob_background.dart';
+import '../widgets/inline_video_player.dart';
 import '../widgets/experience_section.dart';
 import '../widgets/skills_section.dart';
 import '../widgets/courses_section.dart';
-import '../widgets/blob_background.dart';
 import '../widgets/inline_video_player.dart';
 
 class PortfolioApp extends StatelessWidget {
@@ -88,44 +87,78 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
           }
         },
       ),
-      body: Stack(
-        children: [
-          const Positioned.fill(child: BlobBackground(speed: 0.18)),
-          SafeArea(
-            child: LayoutBuilder(
-              builder: (context, c) {
-                final max = c.maxWidth;
-                final isThree = max >= 1180;
-                final isTwo = max >= 820 && !isThree;
-                final columns = isThree ? 3 : (isTwo ? 2 : 1);
-                final grid = SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: columns,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 1.08,
-                );
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, c) {
+            final max = c.maxWidth;
+            final isMobile = max < 600;
+            final isTablet = max >= 600 && max < 1024;
+            final isDesktop = max >= 1024;
 
-                return CustomScrollView(
+            final columns = isDesktop ? 3 : (isTablet ? 2 : 1);
+
+            // Cards feel taller on mobile so media looks good
+            final childAspect =
+            isDesktop ? 1.10 : (isTablet ? 1.03 : 0.88);
+
+            final grid = SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: columns,
+              mainAxisSpacing: isMobile ? 12 : 16,
+              crossAxisSpacing: isMobile ? 12 : 16,
+              childAspectRatio: childAspect,
+            );
+
+            final horizontalPad = EdgeInsets.symmetric(
+              horizontal: isDesktop ? 20 : (isTablet ? 16 : 12),
+            );
+
+            return Stack(
+              children: [
+                // Softer background on phones for perf and legibility
+                Positioned.fill(
+                  child: Opacity(
+                    opacity: isMobile ? 0.35 : 0.55,
+                    child: const BlobBackground(speed: 0.18),
+                  ),
+                ),
+                CustomScrollView(
                   controller: _scrollCtrl,
                   slivers: [
                     SliverToBoxAdapter(
                       key: _aboutKey,
-                      child: PortfolioHero(
-                        name: 'Karam Kottish',
-                        onJumpToProjects: () => _jumpTo(_projectsKey),
-                        cvUrl: cvUrl,
-                        email: 'karamkottish@gmail.com',
+                      child: Padding(
+                        padding: horizontalPad.copyWith(
+                          top: isMobile ? 8 : 0,
+                        ),
+                        child: PortfolioHero(
+                          name: 'Karam Kottish',
+                          onJumpToProjects: () => _jumpTo(_projectsKey),
+                          cvUrl: cvUrl,
+                          email: 'karamkottish@gmail.com',
+                          // You can add optional size hints in your hero widget if desired
+                        ),
                       ),
                     ),
 
-                    const SliverToBoxAdapter(child: AnimatedGradientDivider()),
-
                     SliverToBoxAdapter(
                       child: Padding(
-                        padding: const EdgeInsets.only(bottom: 8),
+                        padding: EdgeInsets.symmetric(
+                          vertical: isMobile ? 18 : 28,
+                        ),
+                        child: const AnimatedGradientDivider(),
+                      ),
+                    ),
+
+                    // Socials – bigger touch targets on mobile
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: horizontalPad.copyWith(
+                          bottom: isMobile ? 4 : 8,
+                        ),
                         child: Wrap(
                           alignment: WrapAlignment.center,
-                          spacing: 12,
+                          spacing: isMobile ? 10 : 12,
+                          runSpacing: isMobile ? 8 : 10,
                           children: const [
                             SocialIconButton(
                               assetPath: 'lib/assets/icons/icons8-github-100.svg',
@@ -147,55 +180,103 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                       ),
                     ),
 
-                    const SliverToBoxAdapter(child: AnimatedGradientDivider()),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: isMobile ? 18 : 28,
+                        ),
+                        child: const AnimatedGradientDivider(),
+                      ),
+                    ),
 
                     SliverToBoxAdapter(
                       key: _expKey,
-                      child: const Padding(
-                        padding: EdgeInsets.fromLTRB(20, 16, 20, 0),
-                        child: ExperienceSection(),
+                      child: Padding(
+                        padding: horizontalPad.copyWith(
+                          top: isMobile ? 8 : 16,
+                        ),
+                        child: const ExperienceSection(),
                       ),
                     ),
 
-                    const SliverToBoxAdapter(child: AnimatedGradientDivider()),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: isMobile ? 18 : 28,
+                        ),
+                        child: const AnimatedGradientDivider(),
+                      ),
+                    ),
 
                     SliverToBoxAdapter(
                       key: _skillsKey,
-                      child: const Padding(
-                        padding: EdgeInsets.fromLTRB(20, 24, 20, 0),
-                        child: SkillsSection(),
+                      child: Padding(
+                        padding: horizontalPad.copyWith(
+                          top: isMobile ? 12 : 24,
+                        ),
+                        child: const SkillsSection(),
                       ),
                     ),
 
-                    const SliverToBoxAdapter(child: AnimatedGradientDivider()),
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: isMobile ? 18 : 28,
+                        ),
+                        child: const AnimatedGradientDivider(),
+                      ),
+                    ),
 
                     SliverToBoxAdapter(
                       key: _projectsKey,
-                      child: const Padding(
-                        padding: EdgeInsets.fromLTRB(20, 28, 20, 8),
-                        child: _SectionHeader(icon: Icons.auto_awesome, title: 'Projects'),
+                      child: Padding(
+                        padding: horizontalPad.copyWith(
+                          top: isMobile ? 16 : 28,
+                          bottom: isMobile ? 4 : 8,
+                        ),
+                        child: _SectionHeader(
+                          icon: Icons.auto_awesome,
+                          title: 'Projects',
+                          isMobile: isMobile,
+                        ),
                       ),
                     ),
 
                     SliverPadding(
-                      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+                      padding: EdgeInsets.fromLTRB(
+                        isDesktop ? 20 : (isTablet ? 16 : 12),
+                        isMobile ? 8 : 12,
+                        isDesktop ? 20 : (isTablet ? 16 : 12),
+                        isMobile ? 18 : 24,
+                      ),
                       sliver: SliverGrid(
                         gridDelegate: grid,
                         delegate: SliverChildListDelegate(const [
                           _ProjectCard(
                             title: '🎓 Graduation App " Revonix "',
                             subtitle: 'Flutter Lead • 2025',
-                            description: 'Connecting Labors with Clients, offline cache, video demo.',
+                            description:
+                            'Connecting Labors with Clients, offline cache, video demo.',
                             image: 'lib/assets/projects/RevonixYellow.jpg',
                             gradient: [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
-                            tags: ['Flutter', 'Clean Architecture', 'NodeJs', 'Riverpod','Stripe','Firebase Notifications','Languages','Dio'],
+                            tags: [
+                              'Flutter',
+                              'Clean Architecture',
+                              'NodeJs',
+                              'Riverpod',
+                              'Stripe',
+                              'Firebase Notifications',
+                              'Languages',
+                              'Dio'
+                            ],
                             isVideo: true,
                             videoPath: 'lib/assets/videos/fullvideoGrad.MP4',
                           ),
                           _ProjectCard(
                             title: '🛍️ E-commerce Clone',
                             subtitle: 'Solo • 2023',
-                            description: 'Catalog, cart, payments, responsive web + mobile.',
+                            description:
+                            'Catalog, cart, payments, responsive web + mobile.',
                             image: 'lib/assets/projects/Shein-logo.png',
                             gradient: [Color(0xFF06D6A0), Color(0xFF00E5FF)],
                             tags: ['Stripe', 'Firebase', 'Responsive'],
@@ -203,10 +284,11 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                           _ProjectCard(
                             title: 'Semester Project 🔄 Change Volenteering App',
                             subtitle: 'Flutter Lead • 2023',
-                            description: 'An App that helps Volunteers connect with companies, theming, analytics.',
+                            description:
+                            'Connect volunteers with companies, theming, analytics.',
                             image: 'lib/assets/projects/Change.png',
                             gradient: [Color(0xFFFF6AC1), Color(0xFFFFD166)],
-                            tags: ['Getx', 'Charts', 'Theming','Languages','Http'],
+                            tags: ['Getx', 'Charts', 'Theming', 'Languages', 'Http'],
                             isVideo: true,
                             videoPath: 'lib/assets/videos/CVPMobileV1.mp4',
                           ),
@@ -214,51 +296,82 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                       ),
                     ),
 
-                    const SliverToBoxAdapter(child: AnimatedGradientDivider()),
-
                     SliverToBoxAdapter(
-                      key: _coursesKey,
-                      child: const Padding(
-                        padding: EdgeInsets.fromLTRB(20, 24, 20, 0),
-                        child: CoursesSection(),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: isMobile ? 18 : 28,
+                        ),
+                        child: const AnimatedGradientDivider(),
                       ),
                     ),
 
-                    const SliverToBoxAdapter(child: AnimatedGradientDivider()),
+                    SliverToBoxAdapter(
+                      key: _coursesKey,
+                      child: Padding(
+                        padding: horizontalPad.copyWith(
+                          top: isMobile ? 12 : 24,
+                        ),
+                        child: const CoursesSection(),
+                      ),
+                    ),
+
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: isMobile ? 18 : 28,
+                        ),
+                        child: const AnimatedGradientDivider(),
+                      ),
+                    ),
 
                     SliverToBoxAdapter(
                       key: _diplomaKey,
-                      child: const Padding(
-                        padding: EdgeInsets.fromLTRB(20, 12, 20, 0),
-                        child: DiplomaSection(number: 1),
+                      child: Padding(
+                        padding: horizontalPad.copyWith(
+                          top: isMobile ? 8 : 12,
+                          bottom: isMobile ? 8 : 0,
+                        ),
+                        child: const DiplomaSection(number: 1),
                       ),
                     ),
 
                     const SliverToBoxAdapter(child: SizedBox(height: 24)),
                   ],
-                );
-              },
-            ),
-          ),
-        ],
+                ),
+              ],
+            );
+          },
+        ),
       ),
     );
   }
 }
 
 class _SectionHeader extends StatelessWidget {
-  const _SectionHeader({required this.icon, required this.title});
+  const _SectionHeader({
+    required this.icon,
+    required this.title,
+    this.isMobile = false,
+  });
   final IconData icon;
   final String title;
+  final bool isMobile;
 
   @override
   Widget build(BuildContext context) {
     final t = Theme.of(context);
     return Row(
       children: [
-        Icon(icon, color: t.colorScheme.primary),
+        Icon(
+          icon,
+          color: t.colorScheme.primary,
+          size: isMobile ? 20 : 24,
+        ),
         const SizedBox(width: 8),
-        Text(title, style: t.textTheme.titleLarge),
+        Text(
+          title,
+          style: (isMobile ? t.textTheme.titleMedium : t.textTheme.titleLarge),
+        ),
       ],
     );
   }
@@ -291,7 +404,6 @@ class _ProjectCard extends StatefulWidget {
 
 class _ProjectCardState extends State<_ProjectCard> {
   bool _playVideo = false;
-  VideoPlayerController? _inlineController;
 
   void _onVisibilityChanged(VisibilityInfo info) {
     if (widget.isVideo && widget.videoPath != null) {
@@ -304,14 +416,9 @@ class _ProjectCardState extends State<_ProjectCard> {
   }
 
   @override
-  void dispose() {
-    _inlineController?.dispose();
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
     return VisibilityDetector(
       key: Key(widget.title),
@@ -328,50 +435,50 @@ class _ProjectCardState extends State<_ProjectCard> {
             }
           },
           child: Ink(
-            padding: const EdgeInsets.all(12),
+            padding: EdgeInsets.all(isMobile ? 10 : 12),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  height: 6,
+                  height: isMobile ? 5 : 6,
                   decoration: BoxDecoration(
                     gradient: LinearGradient(colors: widget.gradient),
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
-                const SizedBox(height: 10),
+                SizedBox(height: isMobile ? 8 : 10),
 
+                // Media area
                 Expanded(
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: widget.isVideo && widget.videoPath != null && _playVideo
+                    child: widget.isVideo &&
+                        widget.videoPath != null &&
+                        _playVideo
                         ? Stack(
                       children: [
                         InlineVideoPlayer(assetPath: widget.videoPath!),
-
+                        // Fullscreen button with larger tap target on phones
                         Positioned(
                           right: 8,
                           bottom: 8,
-                          child: IconButton(
-                            icon: const Icon(Icons.fullscreen,
-                                color: Colors.white, size: 32),
-                            onPressed: () async {
-                              final pos = _inlineController?.value.position ?? Duration.zero;
-
-                              final returnedPos = await Navigator.push<Duration>(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (_) => FullscreenVideoPlayer(
-                                    assetPath: widget.videoPath!,
-                                    startPosition: pos,
+                          child: Material(
+                            color: Colors.black54,
+                            shape: const CircleBorder(),
+                            child: IconButton(
+                              icon: const Icon(Icons.fullscreen,
+                                  color: Colors.white, size: 28),
+                              onPressed: () async {
+                                await Navigator.push<Duration>(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (_) => FullscreenVideoPlayer(
+                                      assetPath: widget.videoPath!,
+                                    ),
                                   ),
-                                ),
-                              );
-
-                              if (returnedPos != null && _inlineController != null) {
-                                await _inlineController!.seekTo(returnedPos);
-                              }
-                            },
+                                );
+                              },
+                            ),
                           ),
                         ),
                       ],
@@ -379,10 +486,7 @@ class _ProjectCardState extends State<_ProjectCard> {
                         : Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.asset(
-                          widget.image,
-                          fit: BoxFit.cover,
-                        ),
+                        Image.asset(widget.image, fit: BoxFit.cover),
                         if (widget.isVideo)
                           const Center(
                             child: Icon(Icons.play_circle,
@@ -393,33 +497,55 @@ class _ProjectCardState extends State<_ProjectCard> {
                   ),
                 ),
 
-                const SizedBox(height: 8),
-                Text(widget.title,
-                    style: Theme.of(context).textTheme.titleMedium),
+                SizedBox(height: isMobile ? 6 : 8),
+                Text(
+                  widget.title,
+                  style: isMobile
+                      ? Theme.of(context)
+                      .textTheme
+                      .titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600)
+                      : Theme.of(context).textTheme.titleMedium,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
                 Text(
                   widget.subtitle,
                   style: Theme.of(context)
                       .textTheme
                       .bodySmall
                       ?.copyWith(color: cs.onSurfaceVariant),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 6),
-                Text(widget.description,
-                    maxLines: 2, overflow: TextOverflow.ellipsis),
-                const SizedBox(height: 8),
+                SizedBox(height: isMobile ? 4 : 6),
+                Text(
+                  widget.description,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                SizedBox(height: isMobile ? 6 : 8),
                 Wrap(
-                  spacing: 6,
-                  runSpacing: 6,
+                  spacing: isMobile ? 4 : 6,
+                  runSpacing: isMobile ? 4 : 6,
                   children: [
                     for (final tag in widget.tags)
                       Chip(
-                        label: Text(tag),
+                        label: Text(
+                          tag,
+                          style: isMobile
+                              ? Theme.of(context)
+                              .textTheme
+                              .labelSmall
+                              : Theme.of(context).textTheme.labelMedium,
+                        ),
                         visualDensity: VisualDensity.compact,
                         side: BorderSide(color: cs.outlineVariant),
                         backgroundColor: cs.surfaceVariant.withOpacity(.35),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(999),
                         ),
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                       ),
                   ],
                 ),
@@ -479,6 +605,8 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
     return WillPopScope(
       onWillPop: () async {
         Navigator.pop(context, _controller.value.position);
@@ -503,6 +631,8 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
           mainAxisSize: MainAxisSize.min,
           children: [
             FloatingActionButton(
+              heroTag: 'play',
+              mini: isMobile,
               backgroundColor: Colors.white,
               onPressed: () {
                 setState(() {
@@ -518,6 +648,8 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
             ),
             const SizedBox(height: 12),
             FloatingActionButton(
+              heroTag: 'mute',
+              mini: isMobile,
               backgroundColor: Colors.white,
               onPressed: _toggleMute,
               child: Icon(
@@ -555,17 +687,16 @@ class _AnimatedGradientDividerState extends State<AnimatedGradientDivider>
 
   @override
   Widget build(BuildContext context) {
+    final isMobile = MediaQuery.of(context).size.width < 600;
+
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 28),
+      padding: EdgeInsets.symmetric(vertical: isMobile ? 18 : 28),
       child: AnimatedBuilder(
         animation: _ctrl,
         builder: (_, __) {
           return CustomPaint(
             painter: _DividerPainter(progress: _ctrl.value),
-            child: const SizedBox(
-              height: 4,
-              width: double.infinity,
-            ),
+            child: const SizedBox(height: 4, width: double.infinity),
           );
         },
       ),

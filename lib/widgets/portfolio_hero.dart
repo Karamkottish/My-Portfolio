@@ -11,12 +11,14 @@ class PortfolioHero extends StatefulWidget {
     required this.onJumpToProjects,
     required this.cvUrl,
     required this.email,
+    this.compact = false, // allow compact mode for very small screens
   });
 
   final String name;
   final VoidCallback onJumpToProjects;
   final String cvUrl;
   final String email;
+  final bool compact;
 
   @override
   State<PortfolioHero> createState() => _PortfolioHeroState();
@@ -37,6 +39,8 @@ class _PortfolioHeroState extends State<PortfolioHero>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final w = MediaQuery.sizeOf(context).width;
+    final isMobile = w < 720;
 
     return AnimatedBuilder(
       animation: _anim,
@@ -44,17 +48,29 @@ class _PortfolioHeroState extends State<PortfolioHero>
         return Stack(
           children: [
             Positioned.fill(
-              child: CustomPaint(painter: _BlobPainter(progress: _anim.value)),
+              child: Opacity(
+                opacity: isMobile ? 0.75 : 1,
+                child: CustomPaint(painter: _BlobPainter(progress: _anim.value)),
+              ),
             ),
             Positioned.fill(
               child: IgnorePointer(
-                child: CustomPaint(painter: _ConfettiPainter(progress: _anim.value)),
+                child: Opacity(
+                  opacity: isMobile ? 0.35 : 0.5, // lighter confetti on phones
+                  child:
+                  CustomPaint(painter: _ConfettiPainter(progress: _anim.value)),
+                ),
               ),
             ),
             Column(
               children: [
                 Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 64, 20, 32),
+                  padding: EdgeInsets.fromLTRB(
+                    20,
+                    isMobile || widget.compact ? 28 : 64,
+                    20,
+                    isMobile || widget.compact ? 20 : 32,
+                  ),
                   child: ConstrainedBox(
                     constraints: const BoxConstraints(maxWidth: 1200),
                     child: Column(
@@ -64,17 +80,18 @@ class _PortfolioHeroState extends State<PortfolioHero>
                           line1: 'Hey, I\'m ${widget.name} 👋',
                           line2: 'Flutter Developer / Frontend Web Developer',
                           progress: _anim.value,
+                          isMobile: isMobile || widget.compact,
                         ),
                         const SizedBox(height: 14),
                         ConstrainedBox(
                           constraints: const BoxConstraints(maxWidth: 900),
                           child: Text(
-                            'Clean UI, smooth motion, and real-world performance — with a sprinkle of Engineering .',
+                            'Clean UI, smooth motion, and real-world performance — with a sprinkle of Engineering.',
                             textAlign: TextAlign.center,
-                            style: Theme.of(context)
-                                .textTheme
-                                .titleMedium
-                                ?.copyWith(color: cs.onSurfaceVariant),
+                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: cs.onSurfaceVariant,
+                              fontSize: (isMobile || widget.compact) ? 14 : null,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 22),
@@ -105,7 +122,7 @@ class _PortfolioHeroState extends State<PortfolioHero>
                 ),
                 // cheerful wave divider
                 SizedBox(
-                  height: 90,
+                  height: isMobile ? 64 : 90,
                   width: double.infinity,
                   child: CustomPaint(
                     painter: _WavePainter(
@@ -144,17 +161,16 @@ class _RainbowHeadline extends StatelessWidget {
     required this.line1,
     required this.line2,
     required this.progress,
+    required this.isMobile,
   });
 
   final String line1;
   final String line2;
   final double progress;
+  final bool isMobile;
 
   @override
   Widget build(BuildContext context) {
-    final w = MediaQuery.sizeOf(context).width;
-    final mobile = w < 720;
-
     // Animate gradient offset for a subtle shimmer
     final dx = (progress * 600) % 600;
 
@@ -165,8 +181,8 @@ class _RainbowHeadline extends StatelessWidget {
           line1,
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: mobile ? 30 : 48,
-            height: 1.08,
+            fontSize: isMobile ? 26 : 48,
+            height: 1.1,
             fontWeight: FontWeight.w900,
             color: const Color(0xFF0F172A),
             letterSpacing: -.4,
@@ -187,7 +203,7 @@ class _RainbowHeadline extends StatelessWidget {
             return ShaderMask(
               blendMode: BlendMode.srcIn,
               shaderCallback: (rect) {
-                final h = rect.height == 0 ? (mobile ? 42.0 : 70.0) : rect.height;
+                final h = rect.height == 0 ? (isMobile ? 38.0 : 70.0) : rect.height;
                 final r = Rect.fromLTWH(-200 + dx, 0, rect.width + 400, h);
                 return gradient.createShader(r);
               },
@@ -195,7 +211,7 @@ class _RainbowHeadline extends StatelessWidget {
                 line2,
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  fontSize: mobile ? 36 : 64,
+                  fontSize: isMobile ? 30 : 64,
                   height: 1.06,
                   fontWeight: FontWeight.w900,
                   color: Colors.white, // masked by shader
@@ -271,8 +287,10 @@ class _WavePainter extends CustomPainter {
 
     final p = Path()
       ..moveTo(0, size.height * .35)
-      ..quadraticBezierTo(size.width * .25, size.height * .55, size.width * .55, size.height * .50)
-      ..quadraticBezierTo(size.width * .85, size.height * .45, size.width, size.height * .60)
+      ..quadraticBezierTo(
+          size.width * .25, size.height * .55, size.width * .55, size.height * .50)
+      ..quadraticBezierTo(
+          size.width * .85, size.height * .45, size.width, size.height * .60)
       ..lineTo(size.width, size.height)
       ..lineTo(0, size.height)
       ..close();
@@ -304,7 +322,8 @@ class _BlobPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _BlobPainter oldDelegate) => oldDelegate.progress != progress;
+  bool shouldRepaint(covariant _BlobPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
 
 class _ConfettiPainter extends CustomPainter {
@@ -322,7 +341,10 @@ class _ConfettiPainter extends CustomPainter {
     ];
     final paint = Paint();
 
-    for (int i = 0; i < 70; i++) {
+    // Slightly fewer dots on tiny screens for perf
+    final count = size.width < 600 ? 50 : 70;
+
+    for (int i = 0; i < count; i++) {
       final c = colors[i % colors.length].withOpacity(0.25);
       paint.color = c;
       final x = (i * 97 + progress * size.width * 0.6) % size.width;
@@ -333,7 +355,8 @@ class _ConfettiPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant _ConfettiPainter oldDelegate) => oldDelegate.progress != progress;
+  bool shouldRepaint(covariant _ConfettiPainter oldDelegate) =>
+      oldDelegate.progress != progress;
 }
 
 /// ==========================================================================
@@ -442,12 +465,11 @@ class _DiplomaSectionState extends State<DiplomaSection>
                       builder: (_, box) {
                         final crossAxisCount = isMobile ? 2 : 4;
                         const spacing = 10.0;
-                        final rawItemW = (box.maxWidth -
-                            spacing * (crossAxisCount - 1)) /
-                            crossAxisCount;
-                        final itemW = isMobile
-                            ? rawItemW
-                            : rawItemW.clamp(0, 220).toDouble();
+                        final rawItemW =
+                            (box.maxWidth - spacing * (crossAxisCount - 1)) /
+                                crossAxisCount;
+                        final itemW =
+                        isMobile ? rawItemW : rawItemW.clamp(0, 220).toDouble();
                         final itemH = itemW * (2 / 3); // 3:2 ratio
 
                         return Wrap(
@@ -539,13 +561,11 @@ class _DiplomaCoursesStyleCard extends StatelessWidget {
         ],
       ),
       clipBehavior: Clip.antiAlias,
-
-      // 🔧 Give Stack a finite size with AspectRatio
+      // Give Stack a finite size with AspectRatio
       child: AspectRatio(
         aspectRatio: 4 / 3,
         child: Stack(
           children: [
-            // Image
             Positioned.fill(
               child: Image.asset(
                 imagePath,
@@ -559,8 +579,6 @@ class _DiplomaCoursesStyleCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Rainbow header strip
             const Positioned(
               left: 0,
               right: 0,
@@ -580,8 +598,6 @@ class _DiplomaCoursesStyleCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Bottom overlay
             Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
@@ -593,8 +609,6 @@ class _DiplomaCoursesStyleCard extends StatelessWidget {
                 ),
               ),
             ),
-
-            // Bottom title + hint
             Positioned(
               left: 14,
               bottom: 12,
@@ -646,7 +660,6 @@ class _DiplomaCoursesStyleCard extends StatelessWidget {
     );
   }
 }
-
 
 class _GalleryThumb extends StatelessWidget {
   const _GalleryThumb({required this.imagePath});
