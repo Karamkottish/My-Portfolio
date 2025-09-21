@@ -5,9 +5,6 @@ import 'package:flutter/services.dart';
 
 typedef SectionTap = void Function(String id);
 
-/// Centered nav bar with soft gradient bg.
-/// • Desktop/tablet: inline links
-/// • Mobile: title + modern glassy bottom-sheet menu (2026 style)
 class StickyRainbowNav extends StatelessWidget implements PreferredSizeWidget {
   const StickyRainbowNav({
     super.key,
@@ -26,105 +23,219 @@ class StickyRainbowNav extends StatelessWidget implements PreferredSizeWidget {
     final w = MediaQuery.sizeOf(context).width;
     final isMobile = w < 720;
 
-    const Color kText = Colors.black;
-    const Color kTextDim = Colors.black87;
-
-    Widget navItem(String id, String label) {
-      return TextButton(
-        onPressed: () => onTap(id),
-        style: TextButton.styleFrom(
-          foregroundColor: kText,
-          overlayColor: Colors.black12,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-        ),
-        child: Text(
-          label,
-          style: const TextStyle(
-            color: kText,
-            fontSize: 16,
-            fontWeight: FontWeight.w800,
-            letterSpacing: .2,
-          ),
-        ),
-      );
-    }
-
-    Future<void> _openMobileMenu() async {
-      HapticFeedback.selectionClick();
-      await showModalBottomSheet<void>(
-        context: context,
-        isScrollControlled: true,
-        useSafeArea: true,
-        barrierColor: Colors.black.withOpacity(0.25),
-        backgroundColor: Colors.transparent,
-        builder: (_) => _MobileMenuSheet(onTap: onTap),
-      );
-    }
-
     return Material(
       color: Colors.transparent,
-      child: Container(
-        height: preferredSize.height,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [Color(0xFFFFFFFF), Color(0xFFF7F1FF)],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          border: Border(bottom: BorderSide(color: Color(0x1F000000))),
-        ),
-        child: Center(
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1200),
-            child: Row(
-              children: [
-                const SizedBox(width: 16),
-                if (isMobile)
-                  _GlassIconButton(
-                    tooltip: 'Menu',
-                    icon: Icons.grid_view_rounded,
-                    onPressed: _openMobileMenu,
-                  ),
-                if (isMobile) const SizedBox(width: 8),
+      child: ClipRRect(
+        child: BackdropFilter(
+          filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+          child: Container(
+            height: preferredSize.height,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [Color(0xFFFFFFFF), Color(0xFFF6F2FF)],
+              ),
+              border: Border(bottom: BorderSide(color: Color(0x19000000))),
+              boxShadow: [
+                BoxShadow(
+                  color: Color(0x12000000),
+                  blurRadius: 18,
+                  offset: Offset(0, 8),
+                )
+              ],
+            ),
+            child: SafeArea(
+              bottom: false,
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: 1200),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: Row(
+                      children: [
+                        if (isMobile)
+                          _GlassIconButton(
+                            tooltip: 'Menu',
+                            icon: Icons.grid_view_rounded,
+                            onPressed: () => _openMobileMenu(context),
+                          ),
+                        if (isMobile) const SizedBox(width: 10),
 
-                Expanded(
-                  child: Text(
-                    title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    textAlign: isMobile ? TextAlign.center : TextAlign.left,
-                    style: const TextStyle(
-                      color: kTextDim,
-                      fontWeight: FontWeight.w900,
-                      fontSize: 20,
-                      letterSpacing: .2,
+                        // Title (fixed width on desktop so links can sit right after it)
+                        Flexible(
+                          flex: 0,
+                          child: Padding(
+                            padding: EdgeInsets.only(right: isMobile ? 0 : 24),
+                            child: Text(
+                              title,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              textAlign: isMobile ? TextAlign.left : TextAlign.left,
+                              style: TextStyle(
+                                color: Colors.black.withOpacity(.86),
+                                fontWeight: FontWeight.w900,
+                                fontSize: 20,
+                                letterSpacing: .2,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Desktop inline nav group (left aligned)
+                        if (!isMobile) ...[
+                          Flexible(
+                            flex: 0,
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              physics: const BouncingScrollPhysics(),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.start,
+                                children: [
+                                  _NavLink(id: 'about', label: 'About', onTap: onTap),
+                                  _NavLink(id: 'experience', label: 'Experience', onTap: onTap),
+                                  _NavLink(id: 'skills', label: 'Skills', onTap: onTap),
+                                  _NavLink(id: 'projects', label: 'Projects', onTap: onTap),
+                                  _NavLink(id: 'courses', label: 'Courses', onTap: onTap),
+                                  _NavLink(id: 'diploma', label: 'Diploma', onTap: onTap),
+                                  _NavLink(id: 'designs', label: 'Designs', onTap: onTap),
+                                ],
+                              ),
+                            ),
+                          ),
+                          const Spacer(), // pushes remaining space to the right
+                        ],
+
+                        // Mobile: a tiny “…” action for future use (kept minimal; trendy)
+                        if (isMobile) ...[
+                          const Spacer(),
+                          _DotBadgeAction(
+                            tooltip: 'Quick actions',
+                            onPressed: () => _openMobileMenu(context),
+                          ),
+                        ],
+                      ],
                     ),
                   ),
                 ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 
-                if (!isMobile) ...[
-                  const SizedBox(width: 24),
-                  Flexible(
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          navItem('about', 'About'),
-                          navItem('experience', 'Experience'),
-                          navItem('skills', 'Skills'),
-                          navItem('projects', 'Projects'),
-                          navItem('courses', 'Courses'),
-                          navItem('diploma', 'Diploma'),
-                        ],
+  Future<void> _openMobileMenu(BuildContext context) async {
+    HapticFeedback.selectionClick();
+    await showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      useSafeArea: true,
+      barrierColor: Colors.black.withOpacity(0.25),
+      backgroundColor: Colors.transparent,
+      builder: (_) => _MobileMenuSheet(onTap: onTap),
+    );
+  }
+}
+
+/// ------------------------------------------------------------------
+/// Desktop link
+/// ------------------------------------------------------------------
+class _NavLink extends StatefulWidget {
+  const _NavLink({required this.id, required this.label, required this.onTap});
+
+  final String id;
+  final String label;
+  final SectionTap onTap;
+
+  @override
+  State<_NavLink> createState() => _NavLinkState();
+}
+
+class _NavLinkState extends State<_NavLink> {
+  bool _hover = false;
+  bool _pressed = false;
+
+  @override
+  Widget build(BuildContext context) {
+    return FocusableActionDetector(
+      mouseCursor: SystemMouseCursors.click,
+      onShowFocusHighlight: (_) => setState(() {}),
+      child: MouseRegion(
+        onEnter: (_) => setState(() => _hover = true),
+        onExit: (_) => setState(() => _hover = false),
+        child: Semantics(
+          button: true,
+          label: widget.label,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 2),
+            child: GestureDetector(
+              onTapDown: (_) => setState(() => _pressed = true),
+              onTapCancel: () => setState(() => _pressed = false),
+              onTapUp: (_) => setState(() => _pressed = false),
+              onTap: () => widget.onTap(widget.id),
+              behavior: HitTestBehavior.opaque,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 160),
+                curve: Curves.easeOut,
+                margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                transform: Matrix4.identity()
+                  ..translate(0.0, _hover ? -1.5 : 0.0)
+                  ..scale(_pressed ? 0.98 : 1.0),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(999),
+                  color: _hover ? Colors.black.withOpacity(.035) : Colors.transparent,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Label with subtle gradient on hover/press
+                    ShaderMask(
+                      blendMode: BlendMode.srcIn,
+                      shaderCallback: (rect) {
+                        final base = const LinearGradient(
+                          colors: [Color(0xFF111111), Color(0xFF111111)],
+                        );
+                        final hoverGrad = const LinearGradient(
+                          colors: [Color(0xFFFF6AC1), Color(0xFF00E5FF)],
+                        );
+                        return (_hover || _pressed ? hoverGrad : base)
+                            .createShader(Offset.zero & rect.size);
+                      },
+                      child: Text(
+                        widget.label,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          letterSpacing: .2,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 16),
-                ],
-              ],
+                    const SizedBox(height: 6),
+                    // Animated underline
+                    AnimatedContainer(
+                      duration: const Duration(milliseconds: 180),
+                      curve: Curves.easeOutCubic,
+                      height: 2.5,
+                      width: _hover ? 24 : 0,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(999),
+                        gradient: const LinearGradient(
+                          colors: [
+                            Color(0xFFFF6AC1),
+                            Color(0xFFFFD166),
+                            Color(0xFF06D6A0),
+                            Color(0xFF00E5FF),
+                            Color(0xFF8B5CF6),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ),
@@ -133,9 +244,9 @@ class StickyRainbowNav extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-/// —————————————————————————————————————————————
-/// 2026 Mobile Menu: glassmorphism, drag, big taps
-/// —————————————————————————————————————————————
+/// ------------------------------------------------------------------
+/// Mobile Menu (glassmorphism, search, big taps, subtle animations)
+/// ------------------------------------------------------------------
 class _MobileMenuSheet extends StatefulWidget {
   const _MobileMenuSheet({required this.onTap});
   final SectionTap onTap;
@@ -151,9 +262,7 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
   @override
   void initState() {
     super.initState();
-    _controller.addListener(() {
-      setState(() => _extent = _controller.size);
-    });
+    _controller.addListener(() => setState(() => _extent = _controller.size));
   }
 
   void _select(String id) {
@@ -164,19 +273,16 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
+    final cs = Theme.of(context).colorScheme;
 
     return Stack(
       children: [
-        // Backdrop blur under the sheet
         Positioned.fill(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
             child: const SizedBox.expand(),
           ),
         ),
-
         DraggableScrollableSheet(
           controller: _controller,
           snap: true,
@@ -191,16 +297,15 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-                  // glassy gradient
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                     colors: [
-                      cs.surface.withOpacity(0.9),
-                      cs.surfaceVariant.withOpacity(0.75),
+                      cs.surface.withOpacity(0.92),
+                      cs.surfaceVariant.withOpacity(0.80),
                     ],
                   ),
-                  border: Border.all(color: cs.outlineVariant.withOpacity(.3)),
+                  border: Border.all(color: cs.outlineVariant.withOpacity(.32)),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withOpacity(0.10),
@@ -215,14 +320,12 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
                     controller: scrollController,
                     physics: const BouncingScrollPhysics(),
                     slivers: [
-                      // Drag handle + animated header
                       SliverToBoxAdapter(
                         child: Column(
                           children: [
                             const SizedBox(height: 10),
                             Container(
-                              height: 5,
-                              width: 44,
+                              height: 5, width: 44,
                               decoration: BoxDecoration(
                                 color: cs.outlineVariant.withOpacity(.6),
                                 borderRadius: BorderRadius.circular(999),
@@ -242,17 +345,16 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
                         ),
                       ),
 
-                      // Search (visual anchor; optional behavior)
+                      // Search
                       SliverToBoxAdapter(
                         child: Padding(
                           padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
                           child: _SearchField(
                             hintText: 'Quick jump…',
                             onSubmitted: (value) {
-                              // naive matcher
                               final q = value.trim().toLowerCase();
                               const ids = [
-                                'about','experience','skills','projects','courses','diploma'
+                                'about','experience','skills','projects','courses','diploma','designs'
                               ];
                               final matched = ids.firstWhere(
                                     (id) => id.startsWith(q),
@@ -289,7 +391,7 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
                             icon: Icons.movie_rounded,
                             label: 'Projects',
                             subtitle: 'Demos, videos, case studies',
-                            trailing: _Badge(text: 'New'),
+                            trailing: const _Badge(text: 'New'),
                             onTap: () => _select('projects'),
                           ),
                           _NavTile(
@@ -303,6 +405,12 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
                             label: 'Diploma',
                             subtitle: 'Academic highlights',
                             onTap: () => _select('diploma'),
+                          ),
+                          _NavTile(
+                            icon: Icons.palette_rounded,
+                            label: 'Designs',
+                            subtitle: 'Social, Brochure & Branding',
+                            onTap: () => _select('designs'),
                           ),
                           const SizedBox(height: 4),
                         ],
@@ -320,7 +428,6 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
                                   label: 'Download CV',
                                   onPressed: () {
                                     HapticFeedback.selectionClick();
-                                    // handled by parent hero section; here we just close menu:
                                     Navigator.of(context).maybePop();
                                   },
                                 ),
@@ -332,7 +439,6 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
                                   label: 'Theme',
                                   onPressed: () {
                                     HapticFeedback.selectionClick();
-                                    // Let app-level theme toggle handle this if you wire it later.
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       const SnackBar(
                                         content: Text('Theme toggle goes here ✨'),
@@ -359,11 +465,16 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
   }
 }
 
-/// ——————————————————
+/// ------------------------------------------------------------------
 /// Small UI pieces
-/// ——————————————————
+/// ------------------------------------------------------------------
 class _GlassIconButton extends StatelessWidget {
-  const _GlassIconButton({required this.tooltip, required this.icon, required this.onPressed});
+  const _GlassIconButton({
+    required this.tooltip,
+    required this.icon,
+    required this.onPressed,
+  });
+
   final String tooltip;
   final IconData icon;
   final VoidCallback onPressed;
@@ -390,7 +501,48 @@ class _GlassIconButton extends StatelessWidget {
               )
             ],
           ),
-          child: Icon(icon, color: Colors.black87, size: 22),
+          child: Icon(icon, color: Colors.black.withOpacity(.86), size: 22),
+        ),
+      ),
+    );
+  }
+}
+
+class _DotBadgeAction extends StatelessWidget {
+  const _DotBadgeAction({required this.tooltip, required this.onPressed});
+  final String tooltip;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    return Tooltip(
+      message: tooltip,
+      child: InkWell(
+        borderRadius: BorderRadius.circular(999),
+        onTap: onPressed,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+          decoration: BoxDecoration(
+            color: cs.surface.withOpacity(.72),
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: cs.outlineVariant.withOpacity(.35)),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 6, height: 6,
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: LinearGradient(
+                    colors: [Color(0xFFFF6AC1), Color(0xFF00E5FF)],
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              const Icon(Icons.more_horiz_rounded, size: 18, color: Colors.black87),
+            ],
+          ),
         ),
       ),
     );
@@ -419,14 +571,12 @@ class _GradientHeader extends StatelessWidget {
       child: Row(
         children: [
           Container(
-            width: 36,
-            height: 36,
+            width: 36, height: 36,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
               gradient: LinearGradient(
                 colors: [cs.primary, cs.tertiary],
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
+                begin: Alignment.topLeft, end: Alignment.bottomRight,
               ),
             ),
             child: const Icon(Icons.explore_rounded, color: Colors.white, size: 20),
@@ -535,12 +685,14 @@ class _NavTile extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label,
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w900,
-                          fontSize: 16,
-                          letterSpacing: .2,
-                        )),
+                    Text(
+                      label,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontSize: 16,
+                        letterSpacing: .2,
+                      ),
+                    ),
                     const SizedBox(height: 2),
                     Text(
                       subtitle,
