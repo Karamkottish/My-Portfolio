@@ -71,7 +71,7 @@ class StickyRainbowNav extends StatelessWidget implements PreferredSizeWidget {
                               title,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              textAlign: isMobile ? TextAlign.left : TextAlign.left,
+                              textAlign: TextAlign.left,
                               style: TextStyle(
                                 color: Colors.black.withOpacity(.86),
                                 fontWeight: FontWeight.w900,
@@ -103,10 +103,10 @@ class StickyRainbowNav extends StatelessWidget implements PreferredSizeWidget {
                               ),
                             ),
                           ),
-                          const Spacer(), // pushes remaining space to the right
+                          const Spacer(),
                         ],
 
-                        // Mobile: a tiny “…” action for future use (kept minimal; trendy)
+                        // Mobile: minimalist quick-action to open menu
                         if (isMobile) ...[
                           const Spacer(),
                           _DotBadgeAction(
@@ -320,6 +320,7 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
                     controller: scrollController,
                     physics: const BouncingScrollPhysics(),
                     slivers: [
+                      // Handle + animated header
                       SliverToBoxAdapter(
                         child: Column(
                           children: [
@@ -412,47 +413,11 @@ class _MobileMenuSheetState extends State<_MobileMenuSheet> {
                             subtitle: 'Social, Brochure & Branding',
                             onTap: () => _select('designs'),
                           ),
-                          const SizedBox(height: 4),
+                          const SizedBox(height: 8),
                         ],
                       ),
 
-                      // Footer actions
-                      SliverToBoxAdapter(
-                        child: Padding(
-                          padding: const EdgeInsets.fromLTRB(16, 12, 16, 20),
-                          child: Row(
-                            children: [
-                              Expanded(
-                                child: _PrimaryButton(
-                                  icon: Icons.download_rounded,
-                                  label: 'Download CV',
-                                  onPressed: () {
-                                    HapticFeedback.selectionClick();
-                                    Navigator.of(context).maybePop();
-                                  },
-                                ),
-                              ),
-                              const SizedBox(width: 12),
-                              Expanded(
-                                child: _GhostButton(
-                                  icon: Icons.nightlight_round,
-                                  label: 'Theme',
-                                  onPressed: () {
-                                    HapticFeedback.selectionClick();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Theme toggle goes here ✨'),
-                                        behavior: SnackBarBehavior.floating,
-                                        duration: Duration(milliseconds: 1200),
-                                      ),
-                                    );
-                                  },
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
+                      // 🔻 Footer actions removed to keep the sheet focused & clean.
                     ],
                   ),
                 ),
@@ -741,54 +706,6 @@ class _Badge extends StatelessWidget {
           fontWeight: FontWeight.w900,
           letterSpacing: .2,
         ),
-      ),
-    );
-  }
-}
-
-class _PrimaryButton extends StatelessWidget {
-  const _PrimaryButton({required this.icon, required this.label, required this.onPressed});
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18),
-      label: Text(label, style: const TextStyle(fontWeight: FontWeight.w900)),
-      style: ElevatedButton.styleFrom(
-        elevation: 0,
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        backgroundColor: cs.primary,
-        foregroundColor: cs.onPrimary,
-      ),
-    );
-  }
-}
-
-class _GhostButton extends StatelessWidget {
-  const _GhostButton({required this.icon, required this.label, required this.onPressed});
-  final IconData icon;
-  final String label;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    return OutlinedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, size: 18, color: Colors.black87),
-      label: Text(label, style: const TextStyle(fontWeight: FontWeight.w900)),
-      style: OutlinedButton.styleFrom(
-        padding: const EdgeInsets.symmetric(vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
-        side: BorderSide(color: cs.outlineVariant.withOpacity(.6)),
-        backgroundColor: cs.surface.withOpacity(.75),
-        foregroundColor: Colors.black,
       ),
     );
   }
