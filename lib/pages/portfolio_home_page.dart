@@ -262,7 +262,8 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                               'Firebase',
                               'GitHub',
                               'Riverpod',
-                              'REST'
+                              'Scrum Team member'
+
                             ],
                             isVideo: false,
                           ),
