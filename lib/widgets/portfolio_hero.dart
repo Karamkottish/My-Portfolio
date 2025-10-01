@@ -95,7 +95,7 @@ class _PortfolioHeroState extends State<PortfolioHero>
                     children: [
                       _AnimatedHeadline(
                         line1: "Hey, I'm ${widget.name} 👋",
-                        line2: 'Flutter Developer / Frontend Web Developer',
+                        line2: 'Flutter Developer / Frontend Web Developer / React Native Developer',
                         progress: _curve.value,
                         isMobile: isMobile,
                       ),
@@ -103,7 +103,7 @@ class _PortfolioHeroState extends State<PortfolioHero>
                       ConstrainedBox(
                         constraints: const BoxConstraints(maxWidth: 900),
                         child: Text(
-                          'Clean UI, smooth motion, and real-world performance — with a sprinkle of Engineering.',
+                          'Clean UI, smooth motion, and real-world performance — with a sprinkle of Engineering , Design New App & Sites is my Passion ',
                           textAlign: TextAlign.center,
                           style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: cs.onSurfaceVariant,

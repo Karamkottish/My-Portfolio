@@ -246,7 +246,19 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                         gridDelegate: grid,
                         // NOTE: SliverGrid expects a SliverChildDelegate, not a Widget
                         delegate: SliverChildListDelegate([
-                          // --- 1) Paws Pal Connect (image card) ---
+                          _ProjectCard(
+                            title: '🏫 Karam University',
+                            subtitle: 'React Native • 2025',
+                            description: 'Modern, clean, trendy university platform with 3D UI and responsive UX. '
+                                'Built in Flutter with Firebase integration and scalable architecture.',
+                            image: 'lib/assets/images/karamuniversitywithoutBackground.png',
+                            gradient: const [Color(0xFF8B5CF6), Color(0xFF06D6A0)],
+                            tags: const ['React Native', 'Firebase', 'Clean UI', '3D Design', 'Full Stack'],
+                            isVideo: false,
+                            trailingTitleWidget: const _HoverGithubButton(
+                              url: 'https://github.com/Karamkottish/MyUniversity',
+                            ),
+                          ),
                           _ProjectCard(
                             title: '🐾 Paws Pal Connect',
                             subtitle: 'Associate Software Engineer • 2025',
@@ -263,12 +275,24 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                               'GitHub',
                               'Riverpod',
                               'Scrum Team member'
-
                             ],
                             isVideo: false,
+                            trailingTitleWidget: const _HoverGithubButton(
+                              url: 'https://github.com/pawspalconnect/ppc/tree/Karam',
+                            ),
                           ),
-
-                          // --- 2) SoftTech Warehouse (image card + GitHub by title) ---
+                          _ProjectCard(
+                            title: '🛒 E-commerce Web',
+                            subtitle: 'FrontEnd Web Developer • 2025',
+                            description: 'medical dashboard web application built with React.js, featuring product management, UI components, and clean responsive design.',
+                            image: 'lib/assets/images/DoctorPic.png',
+                            gradient: const [Color(0xFF00C6FF), Color(0xFF0072FF)], // blue gradient for web
+                            tags: const ['React.js', 'JavaScript', 'Web App', 'Responsive','Clean Ui'],
+                            isVideo: false,
+                            trailingTitleWidget: const _HoverGithubButton(
+                              url: 'https://github.com/AbdallahZagh/E-commerce-web/tree/store_dashboard',
+                            ),
+                          ),
                           _ProjectCard(
                             title: '📦 SoftTech Warehouse',
                             subtitle: 'Part-time • 2025',
@@ -342,6 +366,9 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                             ],
                             isVideo: true,
                             videoPath: 'lib/assets/videos/CVPMobileV1.mp4',
+                            trailingTitleWidget: const _HoverGithubButton(
+                              url: 'https://github.com/Karamkottish/Change-ASPU/tree/flutter',
+                            ),
                           ),
                         ]),
                       ),
