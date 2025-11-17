@@ -10,7 +10,29 @@ class ExperienceSection extends StatelessWidget {
 
     // ============================ DATA ============================
     // Fill roles with real start/end dates. end == null means "Present".
+
     final companies = <_CompanyExp>[
+      _CompanyExp(
+        sort: 1000, // HIGHER THAN ALL → appears first
+        name: 'NPT Solutions',
+        logoPath: 'lib/assets/images/NPT.png',
+        location: 'Banglore, India · Remote',
+        roles: [
+          _RoleExp(
+            title: 'Frontend Web Developer(React Js )',
+            employmentType: 'Full Time',
+            start: DateTime(2025, 8),
+            end: null,
+            bullets: [
+              'Built responsive web apps with React/Next.js and TypeScript.',
+              'Translated designs into clean, reusable components.',
+              'Improved performance via API integrations, caching, and code optimization.',
+              'Added accessibility improvements and dark-mode support.',
+            ],
+            skillsLine: 'React.js, Next.js and +9 skills',
+          ),
+        ],
+      ),
       _CompanyExp(
         sort: 999,
         name: 'Paws Pal Connect',
@@ -19,7 +41,7 @@ class ExperienceSection extends StatelessWidget {
         roles: [
           _RoleExp(
             title: 'Associate Software Engineer',
-            employmentType: 'Internship (Flutter Developer)',
+            employmentType: 'Full Time (Flutter Developer TeamLeader)',
             start: DateTime(2025, 9),
             end: null,
             bullets: [
@@ -74,7 +96,7 @@ class ExperienceSection extends StatelessWidget {
         location: 'Chicago, Illinois, United States · Remote',
         roles: [
           _RoleExp(
-            title: 'Frontend Web Developer',
+            title: 'Frontend Web Developer(React Js TeamLeader)',
             employmentType: 'Internship',
             start: DateTime(2025, 8), // Aug 2025
             end: null,

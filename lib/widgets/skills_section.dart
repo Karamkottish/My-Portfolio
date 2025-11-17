@@ -8,7 +8,7 @@ class SkillsSection extends StatelessWidget {
     'Provider', 'Riverpod', 'Clean Architecture', 'SQLite',
     'Ui/Ux', 'Getx', 'ReactJs', 'NextJs', 'TailWind Css',
     'TypeScript','Animations','Jira','Agile Methodology',
-    'Linux','Github','Gitlab','M-V-C','M-V-V-M'
+    'Linux','Github','Gitlab','M-V-C','M-V-V-M','Render','React Native','Expo Go'
   ];
 
   @override

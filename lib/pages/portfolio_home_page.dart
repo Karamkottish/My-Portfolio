@@ -55,7 +55,7 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
 
 
   static const String cvUrl =
-      'https://drive.google.com/file/d/1-hgV-zkoYVaZudk9sFSjY8rXolNTnWx4/view?usp=sharing';
+      'https://drive.google.com/file/d/1V1JaQcqgW_Cx1kTh4VIe57DRefPzY4gE/view?usp=drive_link';
 
   static const int skillsCount = 24;
 
