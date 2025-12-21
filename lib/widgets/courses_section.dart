@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:math';
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:syncfusion_flutter_pdfviewer/pdfviewer.dart';
@@ -13,8 +14,7 @@ class CoursesSection extends StatefulWidget {
 
 class _Course {
   final String title;
-  final String file; // image or pdf
-
+  final String file;
   const _Course(this.title, this.file);
 }
 
@@ -25,18 +25,17 @@ class _CoursesSectionState extends State<CoursesSection> {
   Timer? _autoTimer;
   Timer? _resumeDelay;
 
-  /// ☑️ Strongly typed list – no nulls, no "!" required
   final List<_Course> courses = const [
-    _Course("Agile (Foundations)", "lib/assets/courses/Agile.png"), // ✅ NEW
-    _Course("User Experience Design (English) — EDRAAK", "lib/assets/courses/EdrakuiuxEng.png"),
-    _Course("تصميم تجربة المستخدم (Arabic) — إدراك", "lib/assets/courses/EdrakuiuxArab.png"),
+    _Course("Agile (Foundations)", "lib/assets/courses/Agile.png"),
+    _Course("Project Management – Udemy", "lib/assets/images/ProjectMnagament.jpg"),
+    _Course("User Experience Design (EN) — EDRAAK", "lib/assets/courses/EdrakuiuxEng.png"),
+    _Course("تصميم تجربة المستخدم — إدراك", "lib/assets/courses/EdrakuiuxArab.png"),
     _Course("UX Researcher — Edraak", "lib/assets/courses/edrakeuxresreacher.png"),
     _Course("Flutter Advanced", "lib/assets/courses/flutterad.jpg"),
     _Course("Manara Fellowship", "lib/assets/courses/manara.png"),
     _Course("Git Training", "lib/assets/courses/git.png"),
     _Course("Ethical Hacking", "lib/assets/courses/hacking.png"),
-    // 🔽 If this was the bad one, ensure the path is correct and folder case matches
-    _Course("UI/UX Diploma (cover)", "lib/assets/Diploma/uiuxDiploma.png"),
+    _Course("UI/UX Diploma", "lib/assets/Diploma/uiuxDiploma.png"),
     _Course("Computational Thinking", "lib/assets/courses/computiional.png"),
     _Course("Google Cloud AI", "lib/assets/courses/googlecould.png"),
     _Course("Google Cloud Operations", "lib/assets/courses/googleoperations.png"),
@@ -52,86 +51,75 @@ class _CoursesSectionState extends State<CoursesSection> {
 
   @override
   void dispose() {
-    _cancelAutoplay();
-    _cancelResumeDelay();
+    _autoTimer?.cancel();
+    _resumeDelay?.cancel();
     _controller.dispose();
     super.dispose();
   }
 
-  // ===== Autoplay logic =====
+  // ===== Autoplay =====
   void _startAutoplay() {
-    if (_autoTimer?.isActive == true || courses.isEmpty) return;
+    if (_autoTimer?.isActive == true) return;
     _autoTimer = Timer.periodic(const Duration(seconds: 4), (_) {
       if (!_controller.hasClients) return;
-      final next = (_index + 1) % courses.length;
       _controller.animateToPage(
-        next,
-        duration: const Duration(milliseconds: 600),
-        curve: Curves.easeInOut,
+        (_index + 1) % courses.length,
+        duration: const Duration(milliseconds: 700),
+        curve: Curves.easeInOutCubic,
       );
     });
   }
 
-  void _cancelAutoplay() {
+  void _pause() {
     _autoTimer?.cancel();
     _autoTimer = null;
   }
 
-  void _cancelResumeDelay() {
+  void _resume() {
     _resumeDelay?.cancel();
-    _resumeDelay = null;
-  }
-
-  void _pauseForUser() {
-    _cancelAutoplay();
-    _cancelResumeDelay();
-  }
-
-  void _resumeAfterDelay([Duration delay = const Duration(seconds: 5)]) {
-    _cancelResumeDelay();
-    _resumeDelay = Timer(delay, _startAutoplay);
+    _resumeDelay = Timer(const Duration(seconds: 5), _startAutoplay);
   }
 
   @override
   Widget build(BuildContext context) {
-    if (courses.isEmpty) {
-      return const Center(child: Text("No courses available"));
-    }
-
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final dotColor = isDark ? Colors.white70 : Colors.black54;
 
     final width = MediaQuery.of(context).size.width;
-    final height = width < 600 ? 220.0 : min(380.0, width * 0.35);
-    final total = courses.length;
+    final height = width < 600 ? 230.0 : min(400.0, width * 0.35);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // ===== Title + Dynamic Count Badge =====
+        // ===== Header =====
         Row(
           children: [
             Text(
               'Courses',
               style: theme.textTheme.headlineSmall?.copyWith(
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.black,
+                fontWeight: FontWeight.w700,
+                letterSpacing: -0.3,
               ),
             ),
-            const SizedBox(width: 10),
-            _CountBadge(count: total),
+            const SizedBox(width: 12),
+            _CountBadge(count: courses.length),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 6),
+        Text(
+          'Certifications & professional learning',
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
+        const SizedBox(height: 18),
 
         // ===== Carousel =====
         SizedBox(
           height: height,
           child: GestureDetector(
-            onPanDown: (_) => _pauseForUser(),
-            onPanCancel: _startAutoplay,
-            onPanEnd: (_) => _resumeAfterDelay(),
+            onPanDown: (_) => _pause(),
+            onPanEnd: (_) => _resume(),
             child: PageView.builder(
               controller: _controller,
               itemCount: courses.length,
@@ -139,47 +127,66 @@ class _CoursesSectionState extends State<CoursesSection> {
               itemBuilder: (context, i) {
                 final course = courses[i];
 
-                // Defensive: assert non-empty paths (so you get a clear error during development)
-                assert(course.file.isNotEmpty, "Course file path is empty for '${course.title}'");
+                return AnimatedBuilder(
+                  animation: _controller,
+                  builder: (context, child) {
+                    double value = 1;
+                    if (_controller.position.haveDimensions) {
+                      value = (_controller.page! - i).abs();
+                      value = (1 - value * 0.2).clamp(0.85, 1.0);
+                    }
 
-                return GestureDetector(
-                  onTap: () => _openCourse(context, course.file, course.title),
-                  child: AnimatedScale(
-                    scale: i == _index ? 1.0 : 0.93,
-                    duration: const Duration(milliseconds: 300),
-                    curve: Curves.easeOut,
-                    child: _ImageCard(filePath: course.file, title: course.title),
+                    return Transform.scale(
+                      scale: value,
+                      child: Opacity(opacity: value, child: child),
+                    );
+                  },
+                  child: Tilt3D(
+                    maxTilt: 10, // 👈 subtle = premium
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(24),
+                        onTap: () => _openCourse(context, course),
+                        child: _ImageCard(course: course),
+                      ),
+                    ),
                   ),
+
                 );
               },
             ),
           ),
         ),
 
-        const SizedBox(height: 14),
+        const SizedBox(height: 16),
 
         // ===== Indicators =====
         Center(
-          child: Wrap(
-            spacing: 6,
-            children: List.generate(
-              courses.length,
-                  (i) => GestureDetector(
-                onTap: () {
-                  _pauseForUser();
-                  _controller.animateToPage(
-                    i,
-                    duration: const Duration(milliseconds: 500),
-                    curve: Curves.easeInOut,
-                  );
-                  _resumeAfterDelay();
-                },
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 250),
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: isDark ? Colors.white10 : Colors.black12,
+              borderRadius: BorderRadius.circular(999),
+            ),
+            child: Wrap(
+              spacing: 8,
+              children: List.generate(
+                courses.length,
+                    (i) => AnimatedContainer(
+                  duration: const Duration(milliseconds: 300),
+                  curve: Curves.easeOutCubic,
                   height: 8,
-                  width: i == _index ? 24 : 8,
+                  width: i == _index ? 28 : 8,
                   decoration: BoxDecoration(
-                    color: i == _index ? Colors.tealAccent : dotColor.withOpacity(0.35),
+                    gradient: i == _index
+                        ? const LinearGradient(
+                      colors: [Color(0xFF00E5FF), Color(0xFFFF6AC1)],
+                    )
+                        : null,
+                    color: i == _index
+                        ? null
+                        : (isDark ? Colors.white30 : Colors.black38),
                     borderRadius: BorderRadius.circular(999),
                   ),
                 ),
@@ -191,49 +198,36 @@ class _CoursesSectionState extends State<CoursesSection> {
     );
   }
 
-  void _openCourse(BuildContext context, String file, String title) {
-    final lower = file.toLowerCase();
-    if (lower.endsWith(".pdf")) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => PdfViewerPage(filePath: file, title: title)),
-      );
-    } else {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (_) => ImageViewerPage(filePath: file, title: title)),
-      );
-    }
+  void _openCourse(BuildContext context, _Course course) {
+    final file = course.file.toLowerCase();
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => file.endsWith('.pdf')
+            ? PdfViewerPage(filePath: course.file, title: course.title)
+            : ImageViewerPage(filePath: course.file, title: course.title),
+      ),
+    );
   }
 }
 
-// ===== Count badge with pluralization =====
+// ===== Badge =====
 class _CountBadge extends StatelessWidget {
-  const _CountBadge({required this.count});
   final int count;
+  const _CountBadge({required this.count});
 
   @override
   Widget build(BuildContext context) {
-    final cs = Theme.of(context).colorScheme;
-    final label = count == 1 ? "1 course" : "$count courses";
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
           colors: [Color(0xFFFF6AC1), Color(0xFF00E5FF)],
         ),
         borderRadius: BorderRadius.circular(999),
-        boxShadow: [
-          BoxShadow(
-            color: cs.primary.withOpacity(.15),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
       ),
       child: Text(
-        label,
+        '$count courses',
         style: const TextStyle(
           color: Colors.white,
           fontWeight: FontWeight.w700,
@@ -243,28 +237,108 @@ class _CountBadge extends StatelessWidget {
     );
   }
 }
+class Tilt3D extends StatefulWidget {
+  final Widget child;
+  final double maxTilt; // degrees
 
-// ===== Card for carousel =====
+  const Tilt3D({
+    super.key,
+    required this.child,
+    this.maxTilt = 12,
+  });
+
+  @override
+  State<Tilt3D> createState() => _Tilt3DState();
+}
+
+class _Tilt3DState extends State<Tilt3D>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  Offset _tilt = Offset.zero;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 250),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  void _onPanUpdate(DragUpdateDetails d, Size size) {
+    final dx = (d.localPosition.dx / size.width - 0.5) * 2;
+    final dy = (d.localPosition.dy / size.height - 0.5) * 2;
+
+    setState(() {
+      _tilt = Offset(
+        dy.clamp(-1.0, 1.0),
+        -dx.clamp(-1.0, 1.0),
+      );
+    });
+  }
+
+  void _resetTilt() {
+    _controller.forward(from: 0).then((_) {
+      setState(() => _tilt = Offset.zero);
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (_, constraints) {
+        return GestureDetector(
+          onPanUpdate: (d) => _onPanUpdate(d, constraints.biggest),
+          onPanEnd: (_) => _resetTilt(),
+          onPanCancel: _resetTilt,
+          child: AnimatedBuilder(
+            animation: _controller,
+            builder: (_, child) {
+              final t = Curves.easeOut.transform(1 - _controller.value);
+              final tiltX = _tilt.dx * widget.maxTilt * t;
+              final tiltY = _tilt.dy * widget.maxTilt * t;
+
+              return Transform(
+                alignment: Alignment.center,
+                transform: Matrix4.identity()
+                  ..setEntry(3, 2, 0.001) // perspective
+                  ..rotateX(tiltX * pi / 180)
+                  ..rotateY(tiltY * pi / 180),
+                child: child,
+              );
+            },
+            child: widget.child,
+          ),
+        );
+      },
+    );
+  }
+}
+
+// ===== Image Card =====
 class _ImageCard extends StatelessWidget {
-  final String filePath;
-  final String title;
-  const _ImageCard({required this.filePath, required this.title});
+  final _Course course;
+  const _ImageCard({required this.course});
 
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final border = isDark ? Colors.white24 : Colors.black12;
 
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: border, width: 1),
+        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            color: Colors.black.withOpacity(isDark ? 0.5 : 0.2),
+            blurRadius: 30,
+            offset: const Offset(0, 18),
           ),
         ],
       ),
@@ -272,46 +346,47 @@ class _ImageCard extends StatelessWidget {
       child: Stack(
         children: [
           Positioned.fill(
-            child: Image.asset(
-              filePath,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                color: Colors.grey.shade800,
-                child: const Center(
-                  child: Icon(Icons.broken_image, color: Colors.white54, size: 48),
-                ),
-              ),
-            ),
+            child: Image.asset(course.file, fit: BoxFit.cover),
           ),
           Positioned.fill(
             child: Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.black.withOpacity(0.6), Colors.transparent],
                   begin: Alignment.bottomCenter,
                   end: Alignment.topCenter,
+                  colors: [
+                    Colors.black.withOpacity(0.75),
+                    Colors.black.withOpacity(0.3),
+                    Colors.transparent,
+                  ],
                 ),
               ),
             ),
           ),
           Positioned(
-            left: 14,
-            bottom: 14,
-            right: 14,
-            child: Text(
-              title,
-              textAlign: TextAlign.start,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                shadows: [
-                  Shadow(
-                    blurRadius: 6,
-                    color: Colors.black54,
-                    offset: Offset(1, 1),
-                  )
-                ],
+            left: 16,
+            right: 16,
+            bottom: 16,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(14),
+              child: BackdropFilter(
+                filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+                child: Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.35),
+                    border: Border.all(color: Colors.white24),
+                  ),
+                  child: Text(
+                    course.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
@@ -321,7 +396,7 @@ class _ImageCard extends StatelessWidget {
   }
 }
 
-/// PDF Viewer Page
+// ===== Viewers =====
 class PdfViewerPage extends StatelessWidget {
   final String filePath;
   final String title;
@@ -336,7 +411,6 @@ class PdfViewerPage extends StatelessWidget {
   }
 }
 
-/// Image Fullscreen Viewer
 class ImageViewerPage extends StatelessWidget {
   final String filePath;
   final String title;
@@ -349,10 +423,6 @@ class ImageViewerPage extends StatelessWidget {
       body: PhotoView(
         imageProvider: AssetImage(filePath),
         backgroundDecoration: const BoxDecoration(color: Colors.black),
-        // If your PhotoView version supports it, you can keep an errorBuilder:
-        // errorBuilder: (_, __, ___) => const Center(
-        //   child: Icon(Icons.broken_image, color: Colors.white54, size: 64),
-        // ),
       ),
     );
   }

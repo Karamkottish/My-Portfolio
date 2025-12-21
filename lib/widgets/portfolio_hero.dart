@@ -11,6 +11,11 @@ class PortfolioHero extends StatefulWidget {
     required this.cvUrl,
     required this.email,
     this.compact = false,
+
+    // ✅ NEW
+    this.pmFocus = true,
+    this.atsMode = false,
+    this.currentlyAt = 'Paws Pal Connect',
   });
 
   final String name;
@@ -19,18 +24,24 @@ class PortfolioHero extends StatefulWidget {
   final String email;
   final bool compact;
 
+  /// Recruiter-first variant
+  final bool pmFocus;
+
+  /// Disable gradients / animation for ATS & PDF
+  final bool atsMode;
+
+  /// Status pill text
+  final String currentlyAt;
+
   @override
   State<PortfolioHero> createState() => _PortfolioHeroState();
 }
 
 class _PortfolioHeroState extends State<PortfolioHero>
-    with TickerProviderStateMixin { // ✅ allow multiple tickers
-  late final AnimationController _ctrl =
+    with TickerProviderStateMixin {
+  late final AnimationController _shimmer =
   AnimationController(vsync: this, duration: const Duration(seconds: 10));
-  late final CurvedAnimation _curve =
-  CurvedAnimation(parent: _ctrl, curve: Curves.easeInOut);
 
-  // Entrance animation (fade + slide)
   late final AnimationController _enter =
   AnimationController(vsync: this, duration: const Duration(milliseconds: 650))
     ..forward();
@@ -38,19 +49,15 @@ class _PortfolioHeroState extends State<PortfolioHero>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-
-    // Respect user's reduced motion preference
-    final reduced = MediaQuery.of(context).disableAnimations;
-    if (reduced) {
-      _ctrl.stop();
-    } else {
-      if (!_ctrl.isAnimating) _ctrl.repeat();
+    final reduceMotion = MediaQuery.of(context).disableAnimations || widget.atsMode;
+    if (!reduceMotion && !_shimmer.isAnimating) {
+      _shimmer.repeat();
     }
   }
 
   @override
   void dispose() {
-    _ctrl.dispose();
+    _shimmer.dispose();
     _enter.dispose();
     super.dispose();
   }
@@ -58,285 +65,378 @@ class _PortfolioHeroState extends State<PortfolioHero>
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final size = MediaQuery.sizeOf(context);
     final isMobile = size.width < 720 || widget.compact;
+    final reduceMotion = MediaQuery.of(context).disableAnimations || widget.atsMode;
 
-    // Slightly slower shimmer on tiny screens (battery friendly)
-    if (!_ctrl.isAnimating && !MediaQuery.of(context).disableAnimations) {
-      _ctrl.repeat(
-        period: Duration(milliseconds: isMobile ? 12000 : 10000),
-      );
-    }
+    final roleLine = widget.pmFocus
+        ? 'Product Manager · Flutter & Frontend Engineer · React Native'
+        : 'Flutter Developer · Frontend Engineer · React Native';
 
-    return AnimatedBuilder(
-      animation: _curve,
-      builder: (_, __) {
-        return Padding(
-          padding: EdgeInsets.fromLTRB(
-            20,
-            isMobile ? 28 : 64,
-            20,
-            isMobile ? 20 : 32,
-          ),
-          child: Center(
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 1200),
-              child: FadeTransition(
-                opacity: _enter.drive(Tween<double>(begin: 0, end: 1)),
-                child: SlideTransition(
-                  position: _enter.drive(
-                    Tween<Offset>(
-                      begin: const Offset(0, .06),
-                      end: Offset.zero,
-                    ).chain(CurveTween(curve: Curves.easeOutCubic)),
+    final description = widget.pmFocus
+        ? 'I lead and build digital products — from strategy and UX to scalable Flutter and frontend engineering.'
+        : 'I design and build clean, performant Flutter and frontend applications with smooth UX.';
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(
+        20,
+        isMobile ? 28 : 64,
+        20,
+        isMobile ? 20 : 32,
+      ),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 1200),
+          child: FadeTransition(
+            opacity: reduceMotion
+                ? const AlwaysStoppedAnimation(1)
+                : _enter.drive(Tween(begin: 0.0, end: 1.0)),
+            child: SlideTransition(
+              position: reduceMotion
+                  ? const AlwaysStoppedAnimation(Offset.zero)
+                  : _enter.drive(
+                Tween(
+                  begin: const Offset(0, .06),
+                  end: Offset.zero,
+                ).chain(CurveTween(curve: Curves.easeOutCubic)),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _Headline(
+                    name: widget.name,
+                    role: roleLine,
+                    shimmer: _shimmer,
+                    isMobile: isMobile,
+                    atsMode: widget.atsMode,
+                    isDark: isDark,
                   ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      _AnimatedHeadline(
-                        line1: "Hey, I'm ${widget.name} 👋",
-                        line2: 'Flutter Developer / Frontend Web Developer / React Native Developer',
-                        progress: _curve.value,
-                        isMobile: isMobile,
-                      ),
-                      const SizedBox(height: 14),
-                      ConstrainedBox(
-                        constraints: const BoxConstraints(maxWidth: 900),
-                        child: Text(
-                          'Clean UI, smooth motion, and real-world performance — with a sprinkle of Engineering , Design New App & Sites is my Passion ',
-                          textAlign: TextAlign.center,
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            color: cs.onSurfaceVariant,
-                            fontSize: isMobile ? 14 : null,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 22),
 
-                      // CTAs with tiny hover scale for delight (no layout shift)
-                      Wrap(
-                        alignment: WrapAlignment.center,
-                        spacing: 12,
-                        runSpacing: 10,
-                        children: [
-                          _HoverScale(
-                            child: _PillCTA(
-                              label: '🎉 View Projects',
-                              onPressed: widget.onJumpToProjects,
-                              bg: const Color(0xFF7C3AED),
-                            ),
-                          ),
-                          _HoverScale(
-                            child: _CandyCTA(
-                              label: '🗂  View CV',
-                              onPressed: () => _launch(context, widget.cvUrl),
-                            ),
-                          ),
-                          _HoverScale(
-                            child: _CandyCTA(
-                              label: '✉️ Contact Me',
-                              onPressed: () =>
-                                  _launch(context, 'mailto:${widget.email}'),
-                            ),
-                          ),
-                        ],
+                  if (!widget.atsMode) ...[
+                    const SizedBox(height: 10),
+                    _StatusPill(
+                      label: 'Currently at ${widget.currentlyAt}',
+                      color: cs.primary,
+                    ),
+                  ],
+
+                  const SizedBox(height: 16),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 900),
+                    child: Text(
+                      description,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: cs.onSurfaceVariant,
+                        fontSize: isMobile ? 14 : null,
+                      ),
+                    ),
+                  ),
+
+                  const SizedBox(height: 22),
+                  Wrap(
+                    alignment: WrapAlignment.center,
+                    spacing: 12,
+                    runSpacing: 10,
+                    children: [
+                      _CTA(
+                        filled: true,
+                        label: '🚀 Explore Projects',
+                        onPressed: widget.onJumpToProjects,
+                      ),
+                      _CTA(
+                        label: '📄 View CV',
+                        onPressed: () => _launch(context, widget.cvUrl),
+                      ),
+                      _CTA(
+                        label: '✉️ Contact',
+                        onPressed: () =>
+                            _launch(context, 'mailto:${widget.email}'),
                       ),
                     ],
                   ),
-                ),
+                ],
               ),
             ),
           ),
-        );
-      },
+        ),
+      ),
     );
   }
 
   static Future<void> _launch(BuildContext context, String url) async {
     final uri = Uri.parse(url);
-    final ok = await launchUrl(
-      uri,
-      mode: url.startsWith('mailto:')
-          ? LaunchMode.platformDefault
-          : LaunchMode.externalApplication,
-    );
-    if (!ok && context.mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Could not open: $url')));
-    }
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 }
 
-/// ---------- Headline with smooth shimmer & glow ----------
-class _AnimatedHeadline extends StatelessWidget {
-  const _AnimatedHeadline({
-    required this.line1,
-    required this.line2,
-    required this.progress,
+// ===================== HEADLINE =====================
+
+class _Headline extends StatelessWidget {
+  const _Headline({
+    required this.name,
+    required this.role,
+    required this.shimmer,
     required this.isMobile,
+    required this.atsMode,
+    required this.isDark,
   });
 
-  final String line1;
-  final String line2;
-  final double progress;
+  final String name;
+  final String role;
+  final AnimationController shimmer;
   final bool isMobile;
+  final bool atsMode;
+  final bool isDark;
 
   @override
   Widget build(BuildContext context) {
-    // progress is eased 0..1; convert to a loop with cosine for ultra smoothness
-    final easedLoop = (1 - math.cos(progress * 2 * math.pi)) / 2; // 0..1..0
-    final dx = _lerpDouble(-180, 220, easedLoop); // shimmer travel
-
-    const rainbow = LinearGradient(
-      colors: [
-        Color(0xFFFF6AC1),
-        Color(0xFFFFD166),
-        Color(0xFF06D6A0),
-        Color(0xFF00E5FF),
-        Color(0xFF8B5CF6),
-      ],
-    );
-
     final nameSize = isMobile ? 36.0 : 66.0;
-    final roleSize = isMobile ? 32.0 : 60.0;
+    final roleSize = isMobile ? 26.0 : 44.0;
 
-    return Column(
-      children: [
-        // NAME — gradient + soft glow for readability
-        Stack(
-          alignment: Alignment.center,
-          children: [
-            Text(
-              line1,
+    if (atsMode) {
+      return Column(
+        children: [
+          Text("Hey, I'm $name",
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: nameSize,
-                height: 1.05,
-                fontWeight: FontWeight.w900,
-                color: Colors.transparent,
-                shadows: const [
-                  Shadow(blurRadius: 20, color: Color(0x55FFFFFF), offset: Offset(0, 2)),
-                  Shadow(blurRadius: 36, color: Color(0x33FFFFFF), offset: Offset(0, 6)),
-                ],
-              ),
+              style: TextStyle(fontSize: nameSize, fontWeight: FontWeight.w900)),
+          const SizedBox(height: 6),
+          Text(role,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: roleSize, fontWeight: FontWeight.w700)),
+        ],
+      );
+    }
+
+    return AnimatedBuilder(
+      animation: shimmer,
+      builder: (_, __) {
+        final t = shimmer.value;
+        final dx = (1 - math.cos(t * 2 * math.pi)) / 2 * 360 - 180;
+
+        final gradient = LinearGradient(
+          colors: isDark
+              ? const [
+            Color(0xFF8B5CF6),
+            Color(0xFF06D6A0),
+          ]
+              : const [
+            Color(0xFFFF6AC1),
+            Color(0xFFFFD166),
+            Color(0xFF06D6A0),
+            Color(0xFF00E5FF),
+            Color(0xFF8B5CF6),
+          ],
+        );
+
+        return Column(
+          children: [
+            _ShimmerText(
+              text: "Hey, I'm $name 👋",
+              size: nameSize,
+              dx: dx,
+              gradient: gradient,
             ),
-            ShaderMask(
-              blendMode: BlendMode.srcIn,
-              shaderCallback: (rect) {
-                final h = rect.height == 0 ? (isMobile ? 40.0 : 72.0) : rect.height;
-                final area = Rect.fromLTWH(dx, 0, rect.width + 360, h);
-                return rainbow.createShader(area);
-              },
-              child: Text(
-                line1,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: nameSize,
-                  height: 1.05,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.4,
-                  color: Colors.white,
-                ),
-              ),
+            const SizedBox(height: 8),
+            _ShimmerText(
+              text: role,
+              size: roleSize,
+              dx: dx,
+              gradient: gradient,
             ),
           ],
-        ),
-        const SizedBox(height: 8),
-        // ROLE — slightly smaller to keep focus on name
-        ShaderMask(
-          blendMode: BlendMode.srcIn,
-          shaderCallback: (rect) {
-            final h = rect.height == 0 ? (isMobile ? 38.0 : 68.0) : rect.height;
-            final area = Rect.fromLTWH(dx, 0, rect.width + 360, h);
-            return rainbow.createShader(area);
-          },
-          child: Text(
-            line2,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: roleSize,
-              height: 1.06,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.6,
-              color: Colors.white,
+        );
+      },
+    );
+  }
+}
+class ProductImpactSection extends StatelessWidget {
+  const ProductImpactSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    final impacts = [
+      'Led product roadmap driving +32% user engagement',
+      'Shipped 18 production releases with zero critical rollbacks',
+      'Reduced delivery cycle by 40% through sprint optimization',
+      'Translated business needs into actionable user stories',
+      'Improved onboarding clarity via UX iteration & feedback',
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Product Impact',
+            style: t.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+        const SizedBox(height: 14),
+        ...impacts.map(
+              (i) => Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.trending_up, color: cs.primary, size: 18),
+                const SizedBox(width: 10),
+                Expanded(child: Text(i, style: t.bodyMedium)),
+              ],
             ),
           ),
         ),
       ],
     );
   }
-
-  double _lerpDouble(num a, num b, double t) => a + (b - a) * t;
 }
-
-/// ---------- Buttons ----------
-class _PillCTA extends StatelessWidget {
-  const _PillCTA({required this.label, required this.onPressed, required this.bg});
-  final String label;
-  final VoidCallback onPressed;
-  final Color bg;
+class ProductPhilosophySection extends StatelessWidget {
+  const ProductPhilosophySection({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return FilledButton(
-      onPressed: onPressed,
-      style: FilledButton.styleFrom(
-        backgroundColor: bg,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-        elevation: 3,
-      ),
-      child: Text(label),
+    final t = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('How I Think About Products',
+            style: t.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+        const SizedBox(height: 12),
+        Text(
+          '• I start with the problem, not the feature\n'
+              '• I validate assumptions early and iterate fast\n'
+              '• UX is a product decision, not decoration\n'
+              '• I optimize for outcomes, not output\n'
+              '• I balance speed with long-term maintainability',
+          style: t.bodyMedium?.copyWith(height: 1.6),
+        ),
+      ],
+    );
+  }
+}
+class ProductThinkingSection extends StatelessWidget {
+  const ProductThinkingSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('How I Think About Products',
+            style: t.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+        const SizedBox(height: 10),
+        Text(
+          '• Start with the problem, not the feature\n'
+              '• Ship small, learn fast\n'
+              '• UX is a product decision\n'
+              '• Optimize for outcomes, not output\n'
+              '• Balance speed with scalability',
+          style: t.bodyMedium?.copyWith(height: 1.6),
+        ),
+      ],
     );
   }
 }
 
-class _CandyCTA extends StatelessWidget {
-  const _CandyCTA({required this.label, required this.onPressed});
+class CurrentlyBuildingSection extends StatelessWidget {
+  const CurrentlyBuildingSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Currently Building',
+            style: t.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+        const SizedBox(height: 10),
+        Text(
+          '• Scaling Paws Pal Connect features based on user analytics\n'
+              '• Improving onboarding and retention flows\n'
+              '• Deepening product analytics & feedback loops\n'
+              '• Expanding leadership into multi-product ownership',
+          style: t.bodyMedium?.copyWith(height: 1.6),
+        ),
+      ],
+    );
+  }
+}
+
+class _ShimmerText extends StatelessWidget {
+  const _ShimmerText({
+    required this.text,
+    required this.size,
+    required this.dx,
+    required this.gradient,
+  });
+
+  final String text;
+  final double size;
+  final double dx;
+  final Gradient gradient;
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (rect) =>
+          gradient.createShader(Rect.fromLTWH(dx, 0, rect.width + 360, rect.height)),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+          fontSize: size,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -0.6,
+        ),
+      ),
+    );
+  }
+}
+
+// ===================== SMALL UI =====================
+
+class _StatusPill extends StatelessWidget {
+  const _StatusPill({required this.label, required this.color});
+  final String label;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: color.withOpacity(0.25)),
+      ),
+      child: Text(label,
+          style: TextStyle(color: color, fontWeight: FontWeight.w700)),
+    );
+  }
+}
+
+class _CTA extends StatelessWidget {
+  const _CTA({
+    required this.label,
+    required this.onPressed,
+    this.filled = false,
+  });
+
   final String label;
   final VoidCallback onPressed;
+  final bool filled;
 
   @override
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
-    return OutlinedButton(
-      onPressed: onPressed,
-      style: OutlinedButton.styleFrom(
-        foregroundColor: cs.primary,
-        side: BorderSide(color: cs.primary.withOpacity(.35)),
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
-      ),
-      child: Text(label),
-    );
+    return filled
+        ? FilledButton(onPressed: onPressed, child: Text(label))
+        : OutlinedButton(onPressed: onPressed, child: Text(label));
   }
-}
 
-/// ---------- Tiny hover scale wrapper (perf-safe, no layout shift) ----------
-class _HoverScale extends StatefulWidget {
-  const _HoverScale({required this.child, this.scale = 1.04});
-  final Widget child;
-  final double scale;
-
-  @override
-  State<_HoverScale> createState() => _HoverScaleState();
-}
-
-class _HoverScaleState extends State<_HoverScale> {
-  bool _hover = false;
-
-  @override
-  Widget build(BuildContext context) {
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hover = true),
-      onExit: (_) => setState(() => _hover = false),
-      child: AnimatedScale(
-        scale: _hover ? widget.scale : 1,
-        duration: const Duration(milliseconds: 140),
-        curve: Curves.easeOut,
-        child: widget.child,
-      ),
-    );
-  }
 }

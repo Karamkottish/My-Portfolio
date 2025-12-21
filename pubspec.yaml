@@ -44,6 +44,7 @@ dependencies:
   google_fonts: ^6.3.1
   ffmpeg_kit_flutter_new: ^3.2.0
   path: ^1.9.0
+
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
@@ -120,6 +121,7 @@ flutter:
     - lib/assets/images/karamuniversitywithoutBackground.png
     - lib/assets/images/DoctorPic.png
     - lib/assets/images/NPT.png
+    - lib/assets/images/ProjectMnagament.jpg
 
 
 

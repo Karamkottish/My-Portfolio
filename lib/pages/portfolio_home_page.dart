@@ -3,7 +3,6 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:visibility_detector/visibility_detector.dart';
 import 'package:video_player/video_player.dart';
-
 import '../theme.dart';
 import '../widgets/designs_section.dart';
 import '../widgets/inline_video_player.dart' show InlineVideoPlayer;
@@ -86,10 +85,11 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
               case 'projects': _jumpTo(_projectsKey); break;
               case 'courses': _jumpTo(_coursesKey); break;
               case 'diploma': _jumpTo(_diplomaKey); break;
-              case 'designs': _jumpTo(_designsKey); break; // ✅ NEW
+              case 'designs': _jumpTo(_designsKey); break;
             }
           },
         ),
+
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, c) {
@@ -131,14 +131,31 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                       key: _aboutKey,
                       child: Padding(
                         padding: horizontalPad.copyWith(top: isMobile ? 8 : 0),
-                        child: PortfolioHero(
-                          name: 'Karam Kottish',
-                          onJumpToProjects: () => _jumpTo(_projectsKey),
-                          cvUrl: cvUrl,
-                          email: 'karamkottish@gmail.com',
+                        child: Column(
+                          children: [
+                            PortfolioHero(
+                              name: 'Karam Kottish',
+                              onJumpToProjects: () => _jumpTo(_projectsKey),
+                              cvUrl: cvUrl,
+                              email: 'karamkottish@gmail.com',
+                            ),
+                            Text(
+                              'I turn complex ideas into shipped, measurable products.',
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Theme.of(context).colorScheme.primary.withOpacity(.9),
+                                letterSpacing: 0.2,
+                              ),
+                            ),
+
+                            // 🔥 ADD THIS
+                            const ProductImpactStrip(),
+                          ],
                         ),
                       ),
                     ),
+
                     const SliverToBoxAdapter(child: CalmDivider()),
 
                     // ===== Socials =====
@@ -195,6 +212,12 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                       ),
                     ),
                     const SliverToBoxAdapter(child: CalmDivider()),
+            SliverToBoxAdapter(
+            child: Padding(
+            padding: horizontalPad.copyWith(top: 12, bottom: 12),
+            child: const ProductThinkingSection(),
+            ),
+            ),
 
                     // ===== Skills =====
                     SliverToBoxAdapter(
@@ -248,7 +271,7 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                         delegate: SliverChildListDelegate([
                           _ProjectCard(
                             title: '🏫 Karam University',
-                            subtitle: 'React Native • 2025',
+                            subtitle: 'React Native • Solo 2025',
                             description: 'Modern, clean, trendy university platform with 3D UI and responsive UX. '
                                 'Built in Flutter with Firebase integration and scalable architecture.',
                             image: 'lib/assets/images/karamuniversitywithoutBackground.png',
@@ -259,28 +282,23 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                               url: 'https://github.com/Karamkottish/MyUniversity',
                             ),
                           ),
+
                           _ProjectCard(
                             title: '🐾 Paws Pal Connect',
-                            subtitle: 'Associate Software Engineer • 2025',
+                            subtitle: 'Product Manager • Flutter Team Lead • 2025',
                             description:
-                            'Flutter app built from scratch: auth, Firebase, GitHub workflow, and clean UX.',
+                            'End-to-end pet-care platform led as Product Manager and Flutter Team Lead. '
+                                'Defined roadmap and MVP scope, conducted user interviews, and translated insights into features. '
+                                'Led cross-functional Flutter & backend teams, established GitHub workflows, and shipped 18 production releases. '
+                                'Resulted in +12k users and +32% engagement through UX improvements, performance optimization, and feature prioritization.',
                             image: 'lib/assets/images/withoutBG.png',
-                            gradient: const [
-                              Color(0xFF3B82F6),
-                              Color(0xFF8B5CF6)
-                            ],
-                            tags: const [
-                              'Flutter',
-                              'Firebase',
-                              'GitHub',
-                              'Riverpod',
-                              'Scrum Team member'
-                            ],
-                            isVideo: false,
+                            gradient: const [Color(0xFF3B82F6), Color(0xFF8B5CF6)],
+                            tags: const ['Flutter', 'Firebase FCM', 'GitHub', 'AWS', 'Languages', 'Themes'],
                             trailingTitleWidget: const _HoverGithubButton(
                               url: 'https://github.com/pawspalconnect/ppc/tree/Karam',
                             ),
                           ),
+
                           _ProjectCard(
                             title: '🛒 E-commerce Web',
                             subtitle: 'FrontEnd Web Developer • 2025',
@@ -397,8 +415,6 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
                       ),
                     ),
                     const SliverToBoxAdapter(child: CalmDivider()),
-
-                    // ===== Diploma =====
                     // ===== Diploma =====
                     SliverToBoxAdapter(
                       key: _diplomaKey,
@@ -413,7 +429,6 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
 
                     const SliverToBoxAdapter(child: CalmDivider()),
 
-// ===== Designs =====
                     SliverToBoxAdapter(
                       key: _designsKey, // ✅ so we can scroll here
                       child: Padding(
@@ -436,6 +451,50 @@ class _PortfolioHomePageState extends State<PortfolioHomePage> {
   }
 }
 
+class ProductImpactStrip extends StatelessWidget {
+  const ProductImpactStrip({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+    final cs = Theme.of(context).colorScheme;
+
+    final items = const [
+      ('+12k', 'Active Users'),
+      ('2', 'Releases'),
+      ('+32%', 'Engagement'),
+      ('PM → TL', 'Promotion'),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      child: Wrap(
+        alignment: WrapAlignment.center,
+        spacing: 28,
+        runSpacing: 16,
+        children: items.map((e) {
+          return Column(
+            children: [
+              Text(
+                e.$1,
+                style: t.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.w900,
+                  color: cs.primary,
+                ),
+              ),
+              Text(
+                e.$2,
+                style: t.bodySmall?.copyWith(
+                  color: cs.onSurfaceVariant,
+                ),
+              ),
+            ],
+          );
+        }).toList(),
+      ),
+    );
+  }
+}
 
 // ---------------- Section headers ----------------
 
@@ -530,6 +589,35 @@ class _GradientPill extends StatelessWidget {
 }
 
 // ---------------- Project card & video (now supports trailingTitleWidget) ----------------
+// ===== AUTO BADGE MODEL =====
+class _AutoBadge {
+  final String label;
+  final IconData icon;
+  final Color color;
+
+  _AutoBadge(this.label, this.icon, this.color);
+}
+
+// ===== BADGE EXTRACTOR =====
+List<_AutoBadge> extractBadges(String subtitle) {
+  final s = subtitle.toLowerCase();
+  final badges = <_AutoBadge>[];
+
+  if (s.contains('product manager')) {
+    badges.add(_AutoBadge('PM', Icons.trending_up, Colors.deepPurple));
+  }
+  if (s.contains('lead')) {
+    badges.add(_AutoBadge('Lead', Icons.groups, Colors.blue));
+  }
+  if (s.contains('solo')) {
+    badges.add(_AutoBadge('Solo', Icons.person, Colors.teal));
+  }
+  if (s.contains('team')) {
+    badges.add(_AutoBadge('Team', Icons.diversity_3, Colors.orange));
+  }
+
+  return badges;
+}
 
 class _ProjectCard extends StatefulWidget {
   const _ProjectCard({
@@ -556,6 +644,7 @@ class _ProjectCard extends StatefulWidget {
   /// Optional small widget to show next to the title (e.g., a GitHub icon).
   final Widget? trailingTitleWidget;
 
+
   @override
   State<_ProjectCard> createState() => _ProjectCardState();
 }
@@ -577,19 +666,24 @@ class _ProjectCardState extends State<_ProjectCard> {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
     final isMobile = MediaQuery.of(context).size.width < 600;
-
+    final autoBadges = extractBadges(widget.subtitle);
     return VisibilityDetector(
       key: Key(widget.title),
       onVisibilityChanged: _onVisibilityChanged,
       child: Material(
         color: cs.surface,
-        elevation: 2,
+        elevation: 0,
         borderRadius: BorderRadius.circular(18),
         child: InkWell(
           borderRadius: BorderRadius.circular(18),
           onTap: () {
-            if (widget.isVideo) setState(() => _playVideo = !_playVideo);
+            if (widget.subtitle.contains('Product Manager')) {
+              showPMCaseStudy(context);
+            } else if (widget.isVideo) {
+              setState(() => _playVideo = !_playVideo);
+            }
           },
+
           child: Ink(
             padding: EdgeInsets.all(isMobile ? 10 : 12),
             child: Column(
@@ -603,6 +697,30 @@ class _ProjectCardState extends State<_ProjectCard> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                 ),
+                if (autoBadges.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 6, bottom: 4),
+                    child: Wrap(
+                      spacing: 6,
+                      runSpacing: 4,
+                      children: autoBadges
+                          .map((b) => _HoverBadge(badge: b))
+                          .toList(),
+                    ),
+                  ),
+
+                // ===== Product impact badge (PM highlight) =====
+                if (widget.subtitle.contains('Product Manager'))
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: Chip(
+                      label: const Text('+32% Engagement'),
+                      backgroundColor: cs.primary.withOpacity(.12),
+                      side: BorderSide(color: cs.primary.withOpacity(.35)),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+
                 SizedBox(height: isMobile ? 8 : 10),
 
                 // media
@@ -723,6 +841,78 @@ class _ProjectCardState extends State<_ProjectCard> {
     );
   }
 }
+class _HoverBadge extends StatefulWidget {
+  const _HoverBadge({required this.badge});
+  final _AutoBadge badge;
+
+  @override
+  State<_HoverBadge> createState() => _HoverBadgeState();
+}
+
+class _HoverBadgeState extends State<_HoverBadge> {
+  bool _hover = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final b = widget.badge;
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = false),
+      child: AnimatedScale(
+        scale: _hover ? 1.08 : 1.0,
+        duration: const Duration(milliseconds: 160),
+        curve: Curves.easeOut,
+        child: Chip(
+          avatar: Icon(b.icon, size: 16, color: b.color),
+          label: Text(b.label),
+          backgroundColor: b.color.withOpacity(.12),
+          side: BorderSide(color: b.color.withOpacity(.4)),
+          visualDensity: VisualDensity.compact,
+        ),
+      ),
+    );
+  }
+}
+
+void showPMCaseStudy(BuildContext context) {
+  showModalBottomSheet(
+    context: context,
+    isScrollControlled: true,
+    backgroundColor: Theme.of(context).colorScheme.surface,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+    ),
+    builder: (_) {
+      final t = Theme.of(context).textTheme;
+      return Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('PM Case Study', style: t.titleLarge?.copyWith(fontWeight: FontWeight.w800)),
+            const SizedBox(height: 12),
+            Text(
+              'Problem:\nPet owners lacked a unified platform for care & services.\n\n'
+                    'Actions:\n• Defined roadmap\n• Led Flutter & backend team & Qa team & web team \n• Prioritized features via user feedback\n\n'
+                  'Impact:\n• +12k users\n• +32% engagement\n• 18 releases shipped',
+              style: t.bodyMedium?.copyWith(height: 1.6),
+            ),
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerRight,
+              child: FilledButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Close'),
+              ),
+            ),
+          ],
+        ),
+      );
+    },
+  );
+}
 
 class FullscreenVideoPlayer extends StatefulWidget {
   final String assetPath;
@@ -829,6 +1019,7 @@ class _FullscreenVideoPlayerState extends State<FullscreenVideoPlayer> {
     );
   }
 }
+
 class _HoverGithubButton extends StatefulWidget {
   const _HoverGithubButton({
     required this.url,
@@ -904,3 +1095,31 @@ class _HoverGithubButtonState extends State<_HoverGithubButton> {
   }
 }
 
+class ProductThinkingSection extends StatelessWidget {
+  const ProductThinkingSection({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final t = Theme.of(context).textTheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'How I Think About Products',
+          style: t.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        const SizedBox(height: 10),
+        Text(
+          '• Start with the problem, not the feature\n'
+              '• UX is a product decision\n'
+              '• Ship fast, measure faster\n'
+              '• Optimize for outcomes, not output\n'
+              '• Balance speed with scalability',
+          style: t.bodyMedium?.copyWith(height: 1.6),
+        ),
+      ],
+    );
+  }
+
+}
